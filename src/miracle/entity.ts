@@ -1,6 +1,6 @@
 import {Point} from "./graphic";
 
-class Entity {
+abstract class Entity {
     public position: Point; // 位置
     private angle: number; // 旋转角度
     public selected: boolean; // 是否处于选中状态
@@ -19,6 +19,8 @@ class Entity {
     public rotate(angle: number) {
         this.angle += angle;
     }
+
+    public abstract draw(ctx: CanvasRenderingContext2D): void;
 }
 
 /**
@@ -34,6 +36,9 @@ export class Image extends Entity {
         this.width = width;
         this.height = height;
     }
+    public draw(ctx: CanvasRenderingContext2D): void {
+        throw new Error("Method not implemented.");
+    }
 }
 
 /**
@@ -41,9 +46,14 @@ export class Image extends Entity {
  */
 export class Shape extends Entity {
     public vertexs: Point[];
-    constructor(position: Point, vertexs: Point[]) {
+    public closed: boolean;
+    constructor(position: Point, vertexs: Point[], closed = false) {
         super(position);
         this.vertexs = vertexs;
+        this.closed = closed;
+    }
+    public draw(ctx: CanvasRenderingContext2D): void {
+        throw new Error("Method not implemented.");
     }
 }
 

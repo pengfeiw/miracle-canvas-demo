@@ -7,6 +7,12 @@ class Miracle {
         this.m_canvas = canvas;
         this.entities = entities;
     }
+
+    public addEntity(...entities: Entity[]) {
+        this.entities.push(...entities);
+    }
+
+    public draw(){}
 }
 
 export default Miracle;
