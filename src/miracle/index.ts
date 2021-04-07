@@ -7,12 +7,24 @@ class Miracle {
         this.m_canvas = canvas;
         this.entities = entities;
     }
-
     public addEntity(...entities: Entity[]) {
         this.entities.push(...entities);
+        
+        const ctx = this.m_canvas.getContext("2d");
+        if (ctx !== null) {
+            for (let i = 0; i < entities.length; i++) {
+                this.entities[i].draw(ctx);
+            }
+        }
     }
-
-    public draw(){}
+    public drawAll(){
+        const ctx = this.m_canvas.getContext("2d");
+        if (ctx !== null) {
+            for (let i = 0; i < this.entities.length; i++) {
+                this.entities[i].draw(ctx);
+            }
+        }
+    }
 }
 
 export default Miracle;

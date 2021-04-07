@@ -1,7 +1,7 @@
 import './App.css';
 import {useEffect, useState, useRef} from "react";
 import Miracle from "./miracle";
-import {Shape} from "./miracle/entity";
+import {Circle, PolyShape} from "./miracle/entity";
 import {Point} from "./miracle/graphic";
 
 const App = () => {
@@ -21,13 +21,22 @@ const App = () => {
 
     useEffect(() => {
         if (miracle) {
-            const rect = new Shape(new Point(100, 100), [
-                new Point(0, 0),
+            const rect = new PolyShape([
+                new Point(0, 10),
                 new Point(200, 0),
                 new Point(200, 100),
                 new Point(0, 100)
-            ], true);
-            miracle.addEntity(rect);
+            ], false);
+            rect.filled = false;
+            const line = new PolyShape([
+                new Point(0, 0),
+                new Point(500, 500)
+            ])
+            line.strokeStyle = "black";
+
+            const circle = new Circle(new Point(400, 400), 300);
+            circle.strokeStyle = "green";
+            miracle.addEntity(rect, line, circle);
         }
     }, [miracle]);
     return (
