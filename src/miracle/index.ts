@@ -7,6 +7,7 @@ class Miracle {
         this.m_canvas = canvas;
         this.entities = entities;
     }
+
     public addEntity(...entities: Entity[]) {
         this.entities.push(...entities);
         
@@ -17,6 +18,7 @@ class Miracle {
             }
         }
     }
+
     public drawAll(){
         const ctx = this.m_canvas.getContext("2d");
         if (ctx !== null) {
@@ -24,6 +26,13 @@ class Miracle {
                 this.entities[i].draw(ctx);
             }
         }
+    }
+
+    /**
+     * 初始化canvas, 给canvas添加事件
+     */
+    private initCanvas() {
+        
     }
 }
 

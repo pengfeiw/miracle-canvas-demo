@@ -1,18 +1,37 @@
-import {Point} from "./graphic";
+import {Point, Rectangle, GraphicsAssist, Vector} from "./graphic";
 import CoordTransform from "./coordTransform";
+
+enum ControlStyle {
+    Rectangle = 1,
+    Circle = 2
+}
 
 abstract class Entity {
     private angle: number; // 旋转角度
+    public isActive: boolean; // 是否处于激活状态
     protected ctf: CoordTransform; // 坐标转换
     public selected: boolean; // 是否处于选中状态
     public xLocked: boolean; // x方向缩放是否禁用
     public yLocked: boolean; // y方向缩放是否禁用
+    public diagLocked: boolean; // 对角线缩放是否禁用
     public rotateLocked: boolean; // 旋转是否禁用
+    public controlStyle: ControlStyle; // 控制点样式
+    public controlSize: number; // 控制点大小
+    public borderStyle: string; // 选中时边框样式
+    public borderWidth: number; // 选中时边框线宽
+    public rotateControlDistance: number; // 旋转点距离包围框矩形的距离
     public constructor(position: Point) {
+        this.isActive = false;
         this.selected = false;
         this.xLocked = false;
         this.yLocked = false;
         this.rotateLocked = false;
+        this.diagLocked = false;
+        this.controlStyle = ControlStyle.Rectangle;
+        this.borderStyle = "#007acc70";
+        this.borderWidth = 2;
+        this.controlSize = 4;
+        this.rotateControlDistance = 30;
         this.ctf = new CoordTransform(position);
         this.angle = 0;
     }
@@ -25,6 +44,100 @@ abstract class Entity {
     }
 
     public abstract draw(ctx: CanvasRenderingContext2D): void;
+
+    public abstract bound(): Rectangle;
+
+    /**
+     * 绘制边界及控制点
+     * @param ctx 
+     */
+    protected drawBound(ctx: CanvasRenderingContext2D): void {
+        const boundRect = this.bound();
+        ctx.strokeStyle = this.borderStyle;
+        ctx.lineWidth = this.borderWidth;
+        /**绘制一个控制点 */
+        const drawControlPoint = (ctx: CanvasRenderingContext2D, worldPoint: Point) => {
+            switch (this.controlStyle) {
+                case ControlStyle.Rectangle:
+                    // 世界坐标点
+                    const ltw = new Point(worldPoint.x - this.controlSize * 0.5, worldPoint.y - this.controlSize * 0.5);
+                    const ldw = new Point(worldPoint.x - this.controlSize * 0.5, worldPoint.y + this.controlSize * 0.5);
+                    const rdw = new Point(worldPoint.x + this.controlSize * 0.5, worldPoint.y + this.controlSize * 0.5);
+                    const rtw = new Point(worldPoint.x + this.controlSize * 0.5, worldPoint.y - this.controlSize * 0.5);
+                    // 设备坐标点
+                    const ltd = this.ctf.worldToDevice_Point(ltw);
+                    const ldd = this.ctf.worldToDevice_Point(ldw);
+                    const rdd = this.ctf.worldToDevice_Point(rdw);
+                    const rtd = this.ctf.worldToDevice_Point(rtw);
+                    // 绘制
+                    ctx.beginPath();
+                    ctx.moveTo(ltd.x, ltd.y);
+                    ctx.lineTo(ldd.x, ldd.y);
+                    ctx.lineTo(rdd.x, rdd.y);
+                    ctx.lineTo(rtd.x, rtd.y);
+                    ctx.closePath();
+                    ctx.stroke();
+                    break;
+                case ControlStyle.Circle:
+                    const ow = worldPoint;
+                    const od = this.ctf.worldToDevice_Point(ow);
+                    const sizeD = 1 / this.ctf.worldToDevice_Len * this.controlSize * 0.5;
+                    ctx.beginPath();
+                    ctx.ellipse(od.x, od.y, sizeD * 0.5, sizeD * 0.5, 0, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    break;
+                default:
+                    throw new Error("unknow control style.")
+            }
+        }
+
+        // 绘制边界
+        const boundRectLtd = this.ctf.worldToDevice_Point(boundRect.lt);
+        const boundRectLdd = this.ctf.worldToDevice_Point(boundRect.ld);
+        const boundRectRtd = this.ctf.worldToDevice_Point(boundRect.rt);
+        const boundRectRdd = this.ctf.worldToDevice_Point(boundRect.rd);
+        ctx.beginPath();
+        ctx.moveTo(boundRectLtd.x, boundRectLtd.y);
+        ctx.lineTo(boundRectLdd.x, boundRectLdd.y);
+        ctx.lineTo(boundRectRdd.x, boundRectRdd.y);
+        ctx.lineTo(boundRectRtd.x, boundRectRtd.y);
+        ctx.closePath();
+        ctx.stroke();
+
+        // 绘制x控制点
+        if (!this.xLocked) {
+            drawControlPoint(ctx, GraphicsAssist.mid(boundRect.lt, boundRect.ld));
+            drawControlPoint(ctx, GraphicsAssist.mid(boundRect.rt, boundRect.rd));
+        }
+
+        // 绘制y控制点
+        if (!this.yLocked) {
+            drawControlPoint(ctx, GraphicsAssist.mid(boundRect.lt, boundRect.rt));
+            drawControlPoint(ctx, GraphicsAssist.mid(boundRect.ld, boundRect.rd));
+        }
+
+        // 绘制顶点处控制点
+        if (!this.diagLocked) {
+            drawControlPoint(ctx, boundRect.lt);
+            drawControlPoint(ctx, boundRect.ld);
+            drawControlPoint(ctx, boundRect.rt);
+            drawControlPoint(ctx, boundRect.rd);
+        }
+
+        // 绘制旋转点
+        if (!this.rotateLocked) {
+            const tmW = GraphicsAssist.mid(boundRect.lt, boundRect.rt);
+            const tmD = this.ctf.worldToDevice_Point(tmW);
+            const rotatePointW = new Point(tmW.x, tmW.y - this.rotateControlDistance);
+            const rotatePointD = this.ctf.worldToDevice_Point(rotatePointW);
+
+            ctx.beginPath();
+            ctx.moveTo(tmD.x, tmD.y);
+            ctx.lineTo(rotatePointD.x, rotatePointD.y);
+            ctx.stroke();
+            drawControlPoint(ctx, rotatePointW);
+        }
+    }
 }
 
 /**
@@ -41,6 +154,9 @@ export class Image extends Entity {
         this.height = height;
     }
     public draw(ctx: CanvasRenderingContext2D): void {
+        throw new Error("Method not implemented.");
+    }
+    public bound(): Rectangle {
         throw new Error("Method not implemented.");
     }
 }
@@ -63,6 +179,9 @@ export abstract class Shape extends Entity {
     public abstract draw(ctx: CanvasRenderingContext2D): void;
 }
 
+/**
+ * 多义线形状,是一个形状，可以是一个多义线，但是不能是一条直线段。
+ */
 export class PolyShape extends Shape {
     public vertexs: Point[];
     public closed: boolean;
@@ -76,8 +195,8 @@ export class PolyShape extends Shape {
      * 在canvas上绘制图形
      */
     public draw(ctx: CanvasRenderingContext2D): void {
-        if (this.vertexs.length < 2) {
-            return;
+        if (this.vertexs.length <= 2) {
+            throw new Error("the count of vertex must greater then 2.");
         }
 
         // 改变样式
@@ -110,12 +229,25 @@ export class PolyShape extends Shape {
             }
             ctx.stroke();
         }
+
+        if (this.isActive) {
+            this.drawBound(ctx);
+        }
+    }
+
+    /**
+     * 求包围框
+     */
+    public bound(): Rectangle {
+        return Rectangle.bound(this.vertexs);
     }
 }
 
+/**
+ * 圆形
+ */
 export class Circle extends Shape {
     public center: Point;
-
     public radiusX: number;
     public radiusY: number;
 
@@ -143,6 +275,17 @@ export class Circle extends Shape {
         } else {
             ctx.stroke();
         }
+
+        if (this.isActive) {
+            this.drawBound(ctx);
+        }
+    }
+
+    /**
+     * 求包围框
+     */
+    public bound(): Rectangle {
+        return new Rectangle(new Point(this.center.x - this.radiusX, this.center.y - this.radiusY), 2 * this.radiusX, 2 * this.radiusY);
     }
 }
 

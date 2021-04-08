@@ -22,21 +22,18 @@ const App = () => {
     useEffect(() => {
         if (miracle) {
             const rect = new PolyShape([
-                new Point(0, 10),
-                new Point(200, 0),
-                new Point(200, 100),
-                new Point(0, 100)
+                new Point(150, 30),
+                new Point(200, 30),
+                new Point(200, 120),
+                new Point(150, 120)
             ], false);
             rect.filled = false;
-            const line = new PolyShape([
-                new Point(0, 0),
-                new Point(500, 500)
-            ])
-            line.strokeStyle = "black";
-
+            rect.isActive = true;
+            rect.closed = true;
             const circle = new Circle(new Point(400, 400), 300);
             circle.strokeStyle = "green";
-            miracle.addEntity(rect, line, circle);
+            circle.isActive = true;
+            miracle.addEntity(rect, circle);
         }
     }, [miracle]);
     return (
