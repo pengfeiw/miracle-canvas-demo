@@ -1,4 +1,4 @@
-import {Point, Rectangle, GraphicsAssist, Vector} from "./graphic";
+import {Point, Rectangle, GraphicsAssist} from "./graphic";
 import CoordTransform from "./coordTransform";
 
 enum ControlStyle {
@@ -20,6 +20,8 @@ abstract class Entity {
     public borderStyle: string; // 选中时边框样式
     public borderWidth: number; // 选中时边框线宽
     public rotateControlDistance: number; // 旋转点距离包围框矩形的距离
+    private _bound?: Rectangle; // 包围框，用于存储第一次计算出的包围框
+
     public constructor(position: Point) {
         this.isActive = false;
         this.selected = false;
@@ -43,16 +45,142 @@ abstract class Entity {
         return this.ctf.worldOrigin;
     }
 
+    /**
+     * 绘制当前entity
+     */
     public abstract draw(ctx: CanvasRenderingContext2D): void;
 
-    public abstract bound(): Rectangle;
+    /**
+     * 获得包围框
+     */
+    protected abstract getBound(): Rectangle;
+
+    /**
+     * 包围框（世界坐标系）
+     */
+    public get bound(): Rectangle {
+        if (!this._bound) {
+            this._bound = this.getBound();
+        }
+        return this._bound;
+    }
+
+    /**
+     * 获得未禁用的控制点包围框
+     */
+    public getEnableControlPointsBound(): Rectangle[] {
+        const res: Rectangle[] = [];
+        // x控制点
+        if (!this.xLocked) {
+            res.push(this.getControlBound_lm());
+            res.push(this.getControlBound_rm());
+        }
+
+        // y控制点
+        if (!this.yLocked) {
+            res.push(this.getControlBound_tm());
+            res.push(this.getControlBound_bm());
+        }
+
+        // 顶点处控制点
+        if (!this.diagLocked) {
+            res.push(this.getControlBound_lt());
+            res.push(this.getControlBound_rt());
+            res.push(this.getControlBound_lb());
+            res.push(this.getControlBound_rb());
+        }
+
+        // 旋转点
+        if (!this.rotateLocked) {
+            res.push(this.getControlBound_rotate());
+        }
+        return res;
+    }
+
+    /**
+     * 获得left middle控制点包围框（世界坐标系）
+     */
+    public getControlBound_lm(): Rectangle {
+        const controlPoint = GraphicsAssist.mid(this.bound.lt, this.bound.ld);
+
+        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    }
+
+    /**
+     * 获得right middle控制点包围框（世界坐标系）
+     */
+    public getControlBound_rm(): Rectangle {
+        const controlPoint = GraphicsAssist.mid(this.bound.rt, this.bound.rd);
+
+        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    }
+
+    /**
+     * 获得top middle控制点包围框（世界坐标系）
+     */
+    public getControlBound_tm(): Rectangle {
+        const controlPoint = GraphicsAssist.mid(this.bound.lt, this.bound.rt);
+
+        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    }
+
+    /**
+     * 获得bottom middle控制点包围框（世界坐标系）
+     */
+    public getControlBound_bm(): Rectangle {
+        const controlPoint = GraphicsAssist.mid(this.bound.ld, this.bound.rd);
+
+        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    }
+
+    /**
+     * 获得left top控制点包围框（世界坐标系）
+     */
+    public getControlBound_lt(): Rectangle {
+        const controlPoint = this.bound.lt;
+        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    }
+
+    /**
+     * 获得left top控制点包围框（世界坐标系）
+     */
+    public getControlBound_rt(): Rectangle {
+        const controlPoint = this.bound.rt;
+        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    }
+
+    /**
+     * 获得left bottom控制点包围框（世界坐标系）
+     */
+    public getControlBound_lb(): Rectangle {
+        const controlPoint = this.bound.ld;
+        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    }
+
+    /**
+     * 获得right bottom控制点包围框（世界坐标系）
+     */
+    public getControlBound_rb(): Rectangle {
+        const controlPoint = this.bound.rd;
+        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    }
+
+    /**
+     * 获得旋转控制点包围框（世界坐标系）
+     */
+    public getControlBound_rotate(): Rectangle {
+        const tm = GraphicsAssist.mid(this.bound.lt, this.bound.rt);
+        const controlPoint = new Point(tm.x, tm.y - this.rotateControlDistance);
+
+        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    }
 
     /**
      * 绘制边界及控制点
      * @param ctx 
      */
     protected drawBound(ctx: CanvasRenderingContext2D): void {
-        const boundRect = this.bound();
+        const boundRect = this.bound;
         ctx.strokeStyle = this.borderStyle;
         ctx.lineWidth = this.borderWidth;
         /**绘制一个控制点 */
@@ -156,9 +284,13 @@ export class Image extends Entity {
     public draw(ctx: CanvasRenderingContext2D): void {
         throw new Error("Method not implemented.");
     }
-    public bound(): Rectangle {
+    public getBound(): Rectangle {
         throw new Error("Method not implemented.");
     }
+
+    // public getControlPointsBound(): Point[] {
+    //     throw new Error("Method not implemented.");
+    // }
 }
 
 /**
@@ -238,9 +370,16 @@ export class PolyShape extends Shape {
     /**
      * 求包围框
      */
-    public bound(): Rectangle {
+    public getBound(): Rectangle {
         return Rectangle.bound(this.vertexs);
     }
+
+    // /**
+    //  * 求控制点的包围框
+    //  */
+    // public getControlPointsBound(): Point[] {
+    //     throw new Error("Method not implemented.");
+    // }
 }
 
 /**
@@ -284,9 +423,16 @@ export class Circle extends Shape {
     /**
      * 求包围框
      */
-    public bound(): Rectangle {
+    public getBound(): Rectangle {
         return new Rectangle(new Point(this.center.x - this.radiusX, this.center.y - this.radiusY), 2 * this.radiusX, 2 * this.radiusY);
     }
+
+    // /**
+    //  * 求控制点的包围框
+    //  */
+    // public getControlPointsBound(): Point[] {
+    //     throw new Error("Method not implemented.");
+    // }
 }
 
 export default Entity;

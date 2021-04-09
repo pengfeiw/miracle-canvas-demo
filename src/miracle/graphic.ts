@@ -5,6 +5,13 @@ export class Point {
         this.x = x;
         this.y = y;
     }
+
+    /**
+     * 求到另一个点的向量
+     */
+    public getVectorTo(point: Point) {
+        return new Vector(point.x - this.x, point.y - this.y);
+    }
 }
 export class Vector {
     public x: number;
@@ -12,6 +19,29 @@ export class Vector {
     public constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
+    }
+
+    /**
+     * 向量点积
+     */
+    public static dotProduct(vec1: Vector, vec2: Vector) {
+        return vec1.x * vec2.x + vec1.y * vec2.y;
+    }
+
+    /**
+     * 向量乘积
+     * 注意：向量的乘积本质上是一个矢量，但是这里适用于二维向量，求得结果是向量的模长。
+     */
+    public static multiProduct(vec1: Vector, vec2: Vector) {
+        return vec1.x * vec2.y - vec1.y * vec2.x;
+    }
+
+    /**
+     * 求单位向量
+     */
+    public normalize() {
+        const l = Math.sqrt(this.x * this.x + this.y * this.y);
+        return new Vector(this.x / l, this.y / l);
     }
 }
 
@@ -109,4 +139,44 @@ export namespace GraphicsAssist {
     export const mid = (point1: Point, point2: Point) => {
         return new Point(0.5 * (point1.x + point2.x), 0.5 * (point1.y + point2.y));
     };
+
+    /**
+     * 判断点是否处于一个矩形中
+     */
+    export const isPointInRectangle = (point: Point, rect: Rectangle) => {
+        const vectLtp = rect.lt.getVectorTo(point).normalize();
+        const vectRtp = rect.rt.getVectorTo(point).normalize();
+        const vectLdp = rect.ld.getVectorTo(point).normalize();
+        const vectRdp = rect.rd.getVectorTo(point).normalize();
+
+        // 1.判断point是否处于rect的边界上
+        // 上边界
+        if (vectLtp.x === -vectRtp.x && vectLtp.y === -vectRtp.y) {
+            return true;
+        }
+        // 左边界
+        if (vectLtp.x === -vectLdp.x && vectLtp.y === -vectLdp.y) {
+            return true;
+        }
+        // 下边界
+        if (vectLdp.x === -vectRdp.x && vectLdp.y === -vectRdp.y) {
+            return true;
+        }
+        // 右边界
+        if (vectRtp.x === -vectRdp.x && vectRtp.y === -vectRdp.y) {
+            return true;
+        }
+
+        // 2.判断point是否处于rect的内部，通过求面积法。如果点位于矩形内部，那么由点和矩形四个点构成的四个三角形总面积必定等于矩形的面积
+        const area1 = Vector.multiProduct(vectLtp, vectLdp) * 0.5;
+        const area2 = Vector.multiProduct(vectLdp, vectRdp) * 0.5;
+        const area3 = Vector.multiProduct(vectRdp, vectRtp) * 0.5;
+        const area4 = Vector.multiProduct(vectLtp, vectRtp) * 0.5;
+        const areaRect = rect.height * rect.width;
+
+        if (area1 + area2 + area3 + area4 === areaRect) {
+            return true;
+        }
+        return false;
+    }
 }

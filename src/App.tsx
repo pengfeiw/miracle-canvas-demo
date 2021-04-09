@@ -17,6 +17,15 @@ const App = () => {
             canvas.style.height = `${size}px`;
             setMiracle(new Miracle(canvas));
         }
+
+        const ctx = canvas?.getContext("2d");
+        if (ctx) {
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+            ctx.moveTo(30, 30);
+            ctx.lineTo(300, 500);
+            ctx.stroke();
+        }
     }, [canvasRef]);
 
     useEffect(() => {

@@ -43,7 +43,7 @@ export default class CoordTransform {
     
     // convert world coord to device coord
     public worldToDevice_Point = (point: Point) => {
-        let resPnt = movePoint(point, this._worldOrigin);
+        let resPnt = movePoint(point, new Vector(this._worldOrigin.x, this._worldOrigin.y));
         resPnt = scalePoint(resPnt, this._worldOrigin, this._worldToDevice_Len);
         return resPnt;
     };
