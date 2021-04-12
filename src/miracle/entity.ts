@@ -176,13 +176,30 @@ abstract class Entity {
     }
 
     /**
-     * 绘制边界及控制点
-     * @param ctx 
+     * 绘制包围框
      */
     protected drawBound(ctx: CanvasRenderingContext2D): void {
         const boundRect = this.bound;
         ctx.strokeStyle = this.borderStyle;
         ctx.lineWidth = this.borderWidth;
+        // 绘制边界
+        const boundRectLtd = this.ctf.worldToDevice_Point(boundRect.lt);
+        const boundRectLdd = this.ctf.worldToDevice_Point(boundRect.ld);
+        const boundRectRtd = this.ctf.worldToDevice_Point(boundRect.rt);
+        const boundRectRdd = this.ctf.worldToDevice_Point(boundRect.rd);
+        ctx.beginPath();
+        ctx.moveTo(boundRectLtd.x, boundRectLtd.y);
+        ctx.lineTo(boundRectLdd.x, boundRectLdd.y);
+        ctx.lineTo(boundRectRdd.x, boundRectRdd.y);
+        ctx.lineTo(boundRectRtd.x, boundRectRtd.y);
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    /**
+     * 绘制控制点 
+     */
+    protected drawControlPoint(ctx: CanvasRenderingContext2D): void {
         /**绘制一个控制点 */
         const drawControlPoint = (ctx: CanvasRenderingContext2D, worldPoint: Point) => {
             switch (this.controlStyle) {
@@ -219,18 +236,9 @@ abstract class Entity {
             }
         }
 
-        // 绘制边界
-        const boundRectLtd = this.ctf.worldToDevice_Point(boundRect.lt);
-        const boundRectLdd = this.ctf.worldToDevice_Point(boundRect.ld);
-        const boundRectRtd = this.ctf.worldToDevice_Point(boundRect.rt);
-        const boundRectRdd = this.ctf.worldToDevice_Point(boundRect.rd);
-        ctx.beginPath();
-        ctx.moveTo(boundRectLtd.x, boundRectLtd.y);
-        ctx.lineTo(boundRectLdd.x, boundRectLdd.y);
-        ctx.lineTo(boundRectRdd.x, boundRectRdd.y);
-        ctx.lineTo(boundRectRtd.x, boundRectRtd.y);
-        ctx.closePath();
-        ctx.stroke();
+        const boundRect = this.bound;
+        ctx.strokeStyle = this.borderStyle;
+        ctx.lineWidth = this.borderWidth;
 
         // 绘制x控制点
         if (!this.xLocked) {
@@ -364,6 +372,7 @@ export class PolyShape extends Shape {
 
         if (this.isActive) {
             this.drawBound(ctx);
+            this.drawControlPoint(ctx);
         }
     }
 
@@ -410,6 +419,7 @@ export class Circle extends Shape {
 
         if (this.isActive) {
             this.drawBound(ctx);
+            this.drawControlPoint(ctx);
         }
     }
 
@@ -419,13 +429,6 @@ export class Circle extends Shape {
     public getBound(): Rectangle {
         return new Rectangle(new Point(this.center.x - this.radiusX, this.center.y - this.radiusY), 2 * this.radiusX, 2 * this.radiusY);
     }
-
-    // /**
-    //  * 求控制点的包围框
-    //  */
-    // public getControlPointsBound(): Point[] {
-    //     throw new Error("Method not implemented.");
-    // }
 }
 
 export default Entity;
