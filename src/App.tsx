@@ -29,7 +29,7 @@ const App = () => {
             ], false);
             rect.filled = false;
             rect.closed = true;
-            const circle = new Circle(new Point(400, 400), 300);
+            const circle = new Circle(new Point(400, 400), 100);
             circle.strokeStyle = "green";
             miracle.addEntity(rect, circle);
         }

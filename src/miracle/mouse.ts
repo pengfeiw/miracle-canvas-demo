@@ -1,5 +1,5 @@
 import Entity from "./entity";
-import {Rectangle, Point, GraphicsAssist} from "./graphic";
+import {Rectangle, Point, GraphicsAssist, Vector} from "./graphic";
 
 export enum Operator {
     /**
@@ -21,9 +21,10 @@ export enum Operator {
 }
 class MiracleMouseControl {
     private entities: Entity[]; // 所有entity
-    private mouseHoveEntity?: Entity; // 当前鼠标悬浮的Entity
+    private mouseHoveEntity?: Entity; // 鼠标未拖拽时，当前鼠标悬浮的Entity
     private canvas: HTMLCanvasElement; // entity所在的画布
     private dragging = false; // 是否正在拖拽
+    private mouseDownPosition?: Point; // 鼠标点击位置
     private operator = Operator.BoxSelect; // 用户此时的操作类型
     private dynamicRect?: Rectangle;
 
@@ -50,7 +51,7 @@ class MiracleMouseControl {
             });
 
             // 绘制动态矩形
-            if (this.dynamicRect) {
+            if (this.operator === Operator.BoxSelect && this.dynamicRect) {
                 const dynaimcRect = this.dynamicRect;
                 ctx.setLineDash([6]);
                 ctx.strokeStyle = "black";
@@ -76,9 +77,6 @@ class MiracleMouseControl {
                 const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len * boundW.width,
                     1 / ent.ctf.worldToDevice_Len * boundW.height);
 
-                // console.log("mousePoint", mousePoint.x, mousePoint.y);
-                // console.log("boundD", boundD.location, boundD.height, boundD.width);
-
                 // 鼠标位于entity包围框内，鼠标指针为"move"
                 if (GraphicsAssist.isPointInRectangle(mousePoint, boundD)) {
                     document.body.style.cursor = "move";
@@ -93,28 +91,72 @@ class MiracleMouseControl {
     private onMouseDown = (event: MouseEvent) => {
         if (event.button === 0) {
             this.dragging = true;
-            this.dynamicRect = new Rectangle(new Point(event.offsetX, event.offsetY), 0, 0);
+            this.mouseDownPosition = new Point(event.offsetX, event.offsetY);
+            if (this.operator === Operator.MoveEntity) {
+                if (this.getActiveEntities().length > 0) {
+                    const boundsD = this.getActiveEntities().map((ent) => {
+                        const boundW = ent.bound;
+                        const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len * boundW.width,
+                            1 / ent.ctf.worldToDevice_Len * boundW.height);
+                        return boundD;
+                    });
 
-            if (this.operator === Operator.MoveEntity && this.mouseHoveEntity) {
-                this.entities.forEach((ent) => {
-                    ent.isActive = false;
-                })
-                this.mouseHoveEntity.isActive = true;
+                    const unionBoundD = Rectangle.union(boundsD);
+
+                    if (!GraphicsAssist.isPointInRectangle(this.mouseDownPosition, unionBoundD)) {
+                        this.entities.forEach((ent) => {
+                            ent.isActive = false;
+                        })
+
+                        if (this.mouseHoveEntity) {
+                            this.mouseHoveEntity.isActive = true;
+                        }
+                    }
+                }
+                else {
+                    if (this.mouseHoveEntity) {
+                        this.mouseHoveEntity.isActive = true;
+                    }
+                }
             }
             if (this.operator === Operator.BoxSelect) {
+                this.dynamicRect = new Rectangle(this.mouseDownPosition, 0, 0);
                 this.entities.forEach((ent) => {
                     ent.isActive = false;
                 })
             }
+            this.redraw();
         }
     }
 
     private onMouseMove = (event: MouseEvent) => {
         if (this.dragging) {
-            const w = event.offsetX - this.dynamicRect!.location.x;
-            const h = event.offsetY - this.dynamicRect!.location.y;
-            this.dynamicRect = new Rectangle(this.dynamicRect!.location, w, h);
-            this.redraw();
+            // 绘制框选框
+            const drawSelectBox = () => {
+                const w = event.offsetX - this.dynamicRect!.location.x;
+                const h = event.offsetY - this.dynamicRect!.location.y;
+                this.dynamicRect = new Rectangle(this.dynamicRect!.location, w, h);
+                this.redraw();
+            };
+
+            const MoveEntity = () => {
+                const activeEntities = this.getActiveEntities();
+                for (let i = 0; i < activeEntities.length; i++) {
+                    activeEntities[i].ctf.displacement(new Vector(event.movementX, event.movementY));
+                }
+                this.redraw();
+            };
+
+            switch (this.operator) {
+                case Operator.BoxSelect:
+                    drawSelectBox();
+                    break;
+                case Operator.MoveEntity:
+                    MoveEntity();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -134,6 +176,10 @@ class MiracleMouseControl {
         this.dynamicRect = undefined;
         this.redraw();
     }
+
+    public getActiveEntities() {
+        return this.entities.filter((ent) => ent.isActive);
+    } 
 }
 
 export default MiracleMouseControl;
