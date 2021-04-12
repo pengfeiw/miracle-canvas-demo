@@ -32,8 +32,8 @@ export class Vector {
      * 向量乘积
      * 注意：向量的乘积本质上是一个矢量，但是这里适用于二维向量，求得结果是向量的模长。
      */
-    public static multiProduct(vec1: Vector, vec2: Vector) {
-        return vec1.x * vec2.y - vec1.y * vec2.x;
+    public static multiProduct_Len(vec1: Vector, vec2: Vector) {
+        return Math.abs(vec1.x * vec2.y - vec1.y * vec2.x);
     }
 
     /**
@@ -45,10 +45,21 @@ export class Vector {
     }
 }
 
+/**
+ * 矩形区域，高和宽可以为负数
+ */
 export class Rectangle {
     public location: Point; // 左上角坐标
-    public width: number; // 宽度
-    public height: number; // 高度
+    private _width: number; // 宽度
+    private _height: number; // 高度
+
+    public get width() {
+        return this._width;
+    }
+
+    public get height() {
+        return this._height;
+    }
 
     /**
      * 左上角点
@@ -85,8 +96,8 @@ export class Rectangle {
      */
     public constructor(location: Point, w: number, h: number) {
         this.location = location;
-        this.width = w;
-        this.height = h;
+        this._width = w;
+        this._height = h;
     }
 
     /**
@@ -117,7 +128,7 @@ export class Rectangle {
      * 求一组Rectangle构成的包围框矩形
      * @param rects 一组矩形
      */
-    public static Union(rects: Rectangle[]) {
+    public static union(rects: Rectangle[]) {
         if (rects.length < 1) {
             throw new Error("Rectangle的个数不能小于1");
         }
@@ -129,6 +140,83 @@ export class Rectangle {
         }
 
         return Rectangle.bound(points);
+    }
+
+    /**
+     * 求一组矩形的交集，如果没有交集返回null
+     * @param rects 一组矩形
+     */
+    public static intersection(rects: Rectangle[]) {
+        if (rects.length < 2) {
+            throw new Error("Rectangle的个数不能小于2");
+        }
+
+        const newRects = [];
+        // 处理矩形尺寸为负数的情况
+        for (let i = 0; i < rects.length; i++) {
+            const newLocation = new Point(rects[i].location.x, rects[i].location.y);
+            if (rects[i].width < 0) {
+                newLocation.x = newLocation.x + rects[i].width;
+            }
+            if (rects[i].height < 0) {
+                newLocation.y = newLocation.y + rects[i].height;
+            }
+            newRects.push(new Rectangle(newLocation, Math.abs(rects[i].width), Math.abs(rects[i].height)));
+        }
+
+        // 判断两个矩形是否相交，如果相交返回相交后的矩形，否则返回null
+        const intersection2 = (rect1: Rectangle, rect2: Rectangle) => {
+            let lx, rx, ty, dy;
+            const isIntersection = rect2.lt.y < rect1.ld.y && rect2.ld.y > rect1.lt.y && rect2.rt.x > rect1.lt.x && rect2.lt.x < rect1.rt.x;
+            if (isIntersection) {
+                const min_x1 = rect1.lt.x;
+                const max_x1 = rect1.rt.x;
+                const min_y1 = rect1.lt.y;
+                const max_y1 = rect1.ld.y;
+
+                const min_x2 = rect2.lt.x;
+                const max_x2 = rect2.rt.x;
+                const min_y2 = rect2.lt.y;
+                const max_y2 = rect2.ld.y;
+
+                // 确定x
+                if (max_x2 < max_x1) {
+                    rx = max_x2;
+                } else {
+                    rx = max_x1;
+                }
+                if (min_x2 < min_x1) {
+                    lx = min_x1;
+                } else {
+                    lx = min_x2;
+                }
+
+                // 确定y
+                if (min_y2 < min_y1) {
+                    ty = min_y1;
+                } else {
+                    ty = min_y2;
+                }
+                if (max_y2 > max_y1) {
+                    dy = max_y1;
+                } else {
+                    dy = max_y2;
+                }
+
+                return new Rectangle(new Point(lx, ty), rx - lx, dy - ty);
+            }
+            return null;
+        }
+
+        let intersectRect: Rectangle | null = newRects[0];
+        for (let i = 1; i < newRects.length; i++) {
+            if (!intersectRect) {
+                return null;
+            }
+            intersectRect = intersection2(intersectRect, newRects[i]);
+        }
+
+        return intersectRect;
     }
 }
 
@@ -144,34 +232,40 @@ export namespace GraphicsAssist {
      * 判断点是否处于一个矩形中
      */
     export const isPointInRectangle = (point: Point, rect: Rectangle) => {
-        const vectLtp = rect.lt.getVectorTo(point).normalize();
-        const vectRtp = rect.rt.getVectorTo(point).normalize();
-        const vectLdp = rect.ld.getVectorTo(point).normalize();
-        const vectRdp = rect.rd.getVectorTo(point).normalize();
+
+        const vectLtp = rect.lt.getVectorTo(point);
+        const vectRtp = rect.rt.getVectorTo(point);
+        const vectLdp = rect.ld.getVectorTo(point);
+        const vectRdp = rect.rd.getVectorTo(point);
+
+        const vectLtp_normal = vectLtp.normalize();
+        const vectRtp_normal = vectRtp.normalize();
+        const vectLdp_normal = vectLdp.normalize();
+        const vectRdp_normal = vectRdp.normalize();
 
         // 1.判断point是否处于rect的边界上
         // 上边界
-        if (vectLtp.x === -vectRtp.x && vectLtp.y === -vectRtp.y) {
+        if (vectLtp_normal.x === -vectRtp_normal.x && vectLtp_normal.y === -vectRtp_normal.y) {
             return true;
         }
         // 左边界
-        if (vectLtp.x === -vectLdp.x && vectLtp.y === -vectLdp.y) {
+        if (vectLtp_normal.x === -vectLdp_normal.x && vectLtp_normal.y === -vectLdp_normal.y) {
             return true;
         }
         // 下边界
-        if (vectLdp.x === -vectRdp.x && vectLdp.y === -vectRdp.y) {
+        if (vectLdp_normal.x === -vectRdp_normal.x && vectLdp_normal.y === -vectRdp_normal.y) {
             return true;
         }
         // 右边界
-        if (vectRtp.x === -vectRdp.x && vectRtp.y === -vectRdp.y) {
+        if (vectRtp_normal.x === -vectRdp_normal.x && vectRtp_normal.y === -vectRdp_normal.y) {
             return true;
         }
 
         // 2.判断point是否处于rect的内部，通过求面积法。如果点位于矩形内部，那么由点和矩形四个点构成的四个三角形总面积必定等于矩形的面积
-        const area1 = Vector.multiProduct(vectLtp, vectLdp) * 0.5;
-        const area2 = Vector.multiProduct(vectLdp, vectRdp) * 0.5;
-        const area3 = Vector.multiProduct(vectRdp, vectRtp) * 0.5;
-        const area4 = Vector.multiProduct(vectLtp, vectRtp) * 0.5;
+        const area1 = Vector.multiProduct_Len(vectLtp, vectLdp) * 0.5;
+        const area2 = Vector.multiProduct_Len(vectLdp, vectRdp) * 0.5;
+        const area3 = Vector.multiProduct_Len(vectRdp, vectRtp) * 0.5;
+        const area4 = Vector.multiProduct_Len(vectLtp, vectRtp) * 0.5;
         const areaRect = rect.height * rect.width;
 
         if (area1 + area2 + area3 + area4 === areaRect) {

@@ -9,7 +9,7 @@ enum ControlStyle {
 abstract class Entity {
     private angle: number; // 旋转角度
     public isActive: boolean; // 是否处于激活状态
-    protected ctf: CoordTransform; // 坐标转换
+    public ctf: CoordTransform; // 坐标转换
     public selected: boolean; // 是否处于选中状态
     public xLocked: boolean; // x方向缩放是否禁用
     public yLocked: boolean; // y方向缩放是否禁用
@@ -66,7 +66,7 @@ abstract class Entity {
     }
 
     /**
-     * 获得未禁用的控制点包围框
+     * 获得未禁用的控制点包围框（世界坐标系）
      */
     public getEnableControlPointsBound(): Rectangle[] {
         const res: Rectangle[] = [];
@@ -373,13 +373,6 @@ export class PolyShape extends Shape {
     public getBound(): Rectangle {
         return Rectangle.bound(this.vertexs);
     }
-
-    // /**
-    //  * 求控制点的包围框
-    //  */
-    // public getControlPointsBound(): Point[] {
-    //     throw new Error("Method not implemented.");
-    // }
 }
 
 /**
