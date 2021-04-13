@@ -1,5 +1,6 @@
 import Entity from "./entity";
 import {Rectangle, Point, GraphicsAssist, Vector} from "./graphic";
+import {ControlStyle} from "./entityCollection";
 
 export enum Operator {
     /**
@@ -19,6 +20,8 @@ export enum Operator {
      */
     MoveEntity
 }
+
+
 class MiracleMouseControl {
     private entities: Entity[]; // 所有entity
     private mouseHoveEntity?: Entity; // 鼠标未拖拽时，当前鼠标悬浮的Entity
@@ -27,7 +30,17 @@ class MiracleMouseControl {
     private mouseDownPosition?: Point; // 鼠标点击位置
     private operator = Operator.BoxSelect; // 用户此时的操作类型
     private dynamicRect?: Rectangle;
-
+    public showControlLt = true; // 左上控制点
+    public showControlTm = true; // 中上控制点
+    public showControlRt = true; // 右上控制点
+    public showControlLm = true; // 左中控制点
+    public showControlLb = true; // 左下控制点
+    public showControlBm = true; // 下中控制点
+    public showControlRb = true; // 右下控制点
+    public showControlRm = true; // 右中控制点
+    public showControlRotate = true; // 旋转控制点
+    public controlStyle = ControlStyle.Rectangle; // 控制点样式
+    public controlSize = 6; // 控制点大小
     public constructor(entities: Entity[], canvas: HTMLCanvasElement) {
         this.entities = entities;
         this.canvas = canvas;
@@ -59,8 +72,18 @@ class MiracleMouseControl {
                 ctx.strokeRect(dynaimcRect.location.x, dynaimcRect.location.y, dynaimcRect.width, dynaimcRect.height);
             }
         }
+        this.drawControlPoint();
     }
 
+    private drawControlPoint() {
+        const activeEntities = this.getActiveEntities();
+
+        if (activeEntities.length === 0) {
+            return;
+        }
+    }
+
+    //#region 鼠标事件
     /**
      * 1.设置鼠标样式
      * 2.根据鼠标位置，判断鼠标操作的类型
@@ -176,10 +199,48 @@ class MiracleMouseControl {
         this.dynamicRect = undefined;
         this.redraw();
     }
+    //#endregion
+
+    //#region 获得控制点包围框
+    
+    //#endregion
 
     public getActiveEntities() {
         return this.entities.filter((ent) => ent.isActive);
-    } 
+    }
+
+    // /**
+    //  * 获得世界坐标系下的状态为active的entity的联合包围框
+    //  */
+    // public getActiveEntitiesBound_world() {
+    //     const activeEntities = this.getActiveEntities();
+    //     if (activeEntities.length === 0) {
+    //         return new Rectangle(new Point(0, 0), 0, 0);
+    //     }
+    //     const boundsW = activeEntities.map((ent) => ent.bound);
+
+    //     return Rectangle.union(boundsW);
+    // }
+
+    /**
+     * 获得设备坐标系下的状态为active的entity的联合包围框
+     */
+    public getActiveEntitesBound_device() {
+        const activeEntities = this.getActiveEntities();
+        if (activeEntities.length === 0) {
+            return new Rectangle(new Point(0, 0), 0, 0);
+        }
+
+        const boundsD = activeEntities.map((ent) => {
+            const boundW = ent.bound;
+            const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len * boundW.width,
+                1 / ent.ctf.worldToDevice_Len * boundW.height);
+            return boundD;
+        });
+        const unionBoundD = Rectangle.union(boundsD);
+
+        return unionBoundD;
+    }
 }
 
 export default MiracleMouseControl;

@@ -1,5 +1,6 @@
 import Entity from "./entity";
 import MiracleMouseControl from "./mouse";
+import {ControlStyle} from "./entityCollection";
 
 class Miracle {
     private low_canvas: HTMLCanvasElement;
@@ -42,6 +43,195 @@ class Miracle {
         }
     }
 
+    //#region 控制点
+    /**
+     * 左上控制点
+     */
+    public get controlLt() {
+        return this.mouseControl?.showControlLt || false;
+    };
+    /**
+     * 左上控制点
+     */
+    public set controlLt(value: boolean) {
+        if (this.mouseControl) {
+            this.mouseControl.showControlLt = value;
+        } else {
+            throw new Error("micral的mouseControl为undefined，无法设置该值");
+        }
+    }
+    /**
+     * 中上控制点
+     */
+    public get controlTm() {
+        return this.mouseControl?.showControlTm || false;
+    };
+    /**
+     * 中上控制点
+     */
+    public set controlTm(value: boolean) {
+        if (this.mouseControl) {
+            this.mouseControl.showControlTm = value;
+        } else {
+            throw new Error("micral的mouseControl为undefined，无法设置该值");
+        }
+    }
+
+    /**
+     * 右上控制点
+     */
+    public get controlRt() {
+        return this.mouseControl?.showControlRt || false;
+    };
+    /**
+     * 右上控制点
+     */
+    public set controlRt(value: boolean) {
+        if (this.mouseControl) {
+            this.mouseControl.showControlRt = value;
+        } else {
+            throw new Error("micral的mouseControl为undefined，无法设置该值");
+        }
+    }
+
+    /**
+     * 左中控制点
+     */
+    public get controlLm() {
+        return this.mouseControl?.showControlLm || false;
+    };
+    /**
+     * 左中控制点
+     */
+    public set controlLm(value: boolean) {
+        if (this.mouseControl) {
+            this.mouseControl.showControlLm = value;
+        } else {
+            throw new Error("micral的mouseControl为undefined，无法设置该值");
+        }
+    }
+
+    /**
+     * 左下控制点
+     */
+    public get controlLb() {
+        return this.mouseControl?.showControlLb || false;
+    };
+    /**
+     * 左下控制点
+     */
+    public set controlLb(value: boolean) {
+        if (this.mouseControl) {
+            this.mouseControl.showControlLb = value;
+        } else {
+            throw new Error("micral的mouseControl为undefined，无法设置该值");
+        }
+    }
+
+    /**
+     * 下中控制点
+     */
+    public get controlBm() {
+        return this.mouseControl?.showControlBm || false;
+    };
+    /**
+     * 下中控制点
+     */
+    public set controlBm(value: boolean) {
+        if (this.mouseControl) {
+            this.mouseControl.showControlBm = value;
+        } else {
+            throw new Error("micral的mouseControl为undefined，无法设置该值");
+        }
+    }
+    /**
+     * 右下控制点
+     */
+    public get controlRb() {
+        return this.mouseControl?.showControlRb || false;
+    };
+    /**
+     * 右下控制点
+     */
+    public set controlRb(value: boolean) {
+        if (this.mouseControl) {
+            this.mouseControl.showControlRb = value;
+        } else {
+            throw new Error("micral的mouseControl为undefined，无法设置该值");
+        }
+    }
+    /**
+     * 右中控制点
+     */
+    public get controlRm() {
+        return this.mouseControl?.showControlRm || false;
+    };
+    /**
+     * 右中控制点
+     */
+    public set controlRm(value: boolean) {
+        if (this.mouseControl) {
+            this.mouseControl.showControlRm = value;
+        } else {
+            throw new Error("micral的mouseControl为undefined，无法设置该值");
+        }
+    }
+    /**
+     * 旋转控制点
+     */
+    public get controlRotate() {
+        return this.mouseControl?.showControlRotate || false;
+    };
+    /**
+     * 旋转控制点
+     */
+    public set controlRotate(value: boolean) {
+        if (this.mouseControl) {
+            this.mouseControl.showControlRotate = value;
+        } else {
+            throw new Error("micral的mouseControl为undefined，无法设置该值");
+        }
+    }
+
+    /**
+     * 控制点样式
+     */
+    public get controlStyle() {
+        if (this.mouseControl) {
+            return this.mouseControl.controlStyle
+        } else {
+            throw new Error("mouseControl为undefined, 无法获得该值");
+        }
+    }
+    /**
+     * 控制点样式
+     */
+    public set controlStyle(style: ControlStyle) {
+        if (this.mouseControl) {
+            this.mouseControl.controlStyle = style;
+        }
+    }
+
+    /**
+     * 控制点大小
+     */
+    public get controlSize() {
+        if (this.mouseControl) {
+            return this.mouseControl.controlSize
+        } else {
+            throw new Error("mouseControl为undefined, 无法获得该值");
+        }
+    }
+    /**
+     * 控制点大小
+     */
+    public set controlSize(value: number) {
+        if (this.mouseControl) {
+            this.mouseControl.controlSize = value;
+        }
+    }
+    //#endregion
+
     public addEntity(...entities: Entity[]) {
         this.entities.push(...entities);
 
@@ -60,13 +250,6 @@ class Miracle {
                 this.entities[i].draw(ctx);
             }
         }
-    }
-
-    /**
-     * 给up_canvas添加事件
-     */
-    private initCanvas() {
-
     }
 }
 
