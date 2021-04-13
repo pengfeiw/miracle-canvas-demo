@@ -29,9 +29,17 @@ const App = () => {
             ], false);
             rect.filled = false;
             rect.closed = true;
-            const circle = new Circle(new Point(400, 400), 100);
+            const circle = new Circle(new Point(400, 400), 50);
             circle.strokeStyle = "green";
-            miracle.addEntity(rect, circle);
+            const triangle = new PolyShape([
+                new Point(100, 100),
+                new Point(150, 150),
+                new Point(100, 200)
+            ]);
+            triangle.filled = true;
+            triangle.closed = true;
+            triangle.fillStyle = "gray";
+            miracle.addEntity(rect, circle, triangle);
         }
     }, [miracle]);
     return (

@@ -1,4 +1,4 @@
-import {Point, Rectangle, GraphicsAssist} from "./graphic";
+import {Point, Rectangle, GraphicsAssist, Vector} from "./graphic";
 import CoordTransform from "./coordTransform";
 
 enum ControlStyle {
@@ -7,39 +7,22 @@ enum ControlStyle {
 }
 
 abstract class Entity {
-    private angle: number; // 旋转角度
-    public isActive: boolean; // 是否处于激活状态
+    public isActive = false; // 是否处于激活状态
+    public isDrawControlPoint = true; // 是否绘制控制点
     public ctf: CoordTransform; // 坐标转换
-    public selected: boolean; // 是否处于选中状态
-    public xLocked: boolean; // x方向缩放是否禁用
-    public yLocked: boolean; // y方向缩放是否禁用
-    public diagLocked: boolean; // 对角线缩放是否禁用
-    public rotateLocked: boolean; // 旋转是否禁用
-    public controlStyle: ControlStyle; // 控制点样式
-    public controlSize: number; // 控制点大小
-    public borderStyle: string; // 选中时边框样式
-    public borderWidth: number; // 选中时边框线宽
-    public rotateControlDistance: number; // 旋转点距离包围框矩形的距离
+    public xLocked = false; // x方向缩放是否禁用
+    public yLocked = false; // y方向缩放是否禁用
+    public diagLocked = false; // 对角线缩放是否禁用
+    public rotateLocked = false; // 旋转是否禁用
+    public controlStyle = ControlStyle.Rectangle; // 控制点样式
+    public controlSize = 8; // 控制点大小
+    public borderStyle = "#007acc"; // 选中时边框样式
+    public borderWidth = 2; // 选中时边框线宽
+    public rotateControlDistance = 40; // 旋转点距离包围框矩形的距离
     private _bound?: Rectangle; // 包围框，用于存储第一次计算出的包围框
 
     public constructor(position: Point) {
-        this.isActive = false;
-        this.selected = false;
-        this.xLocked = false;
-        this.yLocked = false;
-        this.rotateLocked = false;
-        this.diagLocked = false;
-        this.controlStyle = ControlStyle.Rectangle;
-        this.borderStyle = "#007acc70";
-        this.borderWidth = 2;
-        this.controlSize = 4;
-        this.rotateControlDistance = 30;
-        this.ctf = new CoordTransform(position);
-        this.angle = 0;
-    }
-
-    public rotate(angle: number) {
-        this.angle += angle;
+        this.ctf = new CoordTransform(position, 1);
     }
     public getPosition() {
         return this.ctf.worldOrigin;
@@ -221,7 +204,7 @@ abstract class Entity {
                     ctx.lineTo(rdd.x, rdd.y);
                     ctx.lineTo(rtd.x, rtd.y);
                     ctx.closePath();
-                    ctx.stroke();
+                    ctx.fill();
                     break;
                 case ControlStyle.Circle:
                     const ow = worldPoint;
@@ -229,7 +212,7 @@ abstract class Entity {
                     const sizeD = 1 / this.ctf.worldToDevice_Len * this.controlSize * 0.5;
                     ctx.beginPath();
                     ctx.ellipse(od.x, od.y, sizeD * 0.5, sizeD * 0.5, 0, 0, 2 * Math.PI);
-                    ctx.stroke();
+                    ctx.fill();
                     break;
                 default:
                     throw new Error("unknow control style.")
@@ -238,6 +221,7 @@ abstract class Entity {
 
         const boundRect = this.bound;
         ctx.strokeStyle = this.borderStyle;
+        ctx.fillStyle = this.borderStyle;
         ctx.lineWidth = this.borderWidth;
 
         // 绘制x控制点
@@ -273,6 +257,23 @@ abstract class Entity {
             ctx.stroke();
             drawControlPoint(ctx, rotatePointW);
         }
+    }
+
+    /**
+     * 平移
+     */
+    public displacement(vector: Vector) {
+        this.ctf.displacement(vector);
+    }
+
+    /**
+     * 缩放
+     */
+    public zoom(originInDevice: Point, scale: number){
+        this.ctf.zoom(originInDevice, scale);
+        // const newCtf = new CoordTransform(this.ctf.worldOrigin, this.ctf.worldToDevice_Len);
+        // newCtf.zoom(origin, scale);
+        // this.ctf = newCtf;
     }
 }
 
@@ -372,7 +373,9 @@ export class PolyShape extends Shape {
 
         if (this.isActive) {
             this.drawBound(ctx);
-            this.drawControlPoint(ctx);
+            if (this.isDrawControlPoint) {
+                this.drawControlPoint(ctx);
+            }
         }
     }
 
@@ -419,7 +422,9 @@ export class Circle extends Shape {
 
         if (this.isActive) {
             this.drawBound(ctx);
-            this.drawControlPoint(ctx);
+            if (this.isDrawControlPoint) {
+                this.drawControlPoint(ctx);
+            }
         }
     }
 
@@ -428,6 +433,39 @@ export class Circle extends Shape {
      */
     public getBound(): Rectangle {
         return new Rectangle(new Point(this.center.x - this.radiusX, this.center.y - this.radiusY), 2 * this.radiusX, 2 * this.radiusY);
+    }
+}
+
+/**
+ * 一组entity的集合
+ */
+export class EntityCollection extends Entity {
+    public entities: Entity[];
+    public constructor(entities: Entity[]) {
+        super(new Point(0, 0));
+        this.entities = entities;
+    }
+    public draw(ctx: CanvasRenderingContext2D): void {
+        for (let i = 0; i < this.entities.length; i++) {
+            this.entities[i].draw(ctx);
+        }
+
+        if (this.isActive) {
+            this.drawBound(ctx);
+            if (this.isDrawControlPoint) {
+                this.drawControlPoint(ctx);
+            }
+        }
+    }
+    protected getBound(): Rectangle {
+        const boundsD = this.entities.map((ent) => {
+            const boundW = ent.bound;
+            const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len * boundW.width,
+                1 / ent.ctf.worldToDevice_Len * boundW.height);
+            return boundD;
+        });
+
+        return Rectangle.union(boundsD);
     }
 }
 
