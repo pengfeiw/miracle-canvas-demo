@@ -19,15 +19,10 @@ abstract class Entity {
     public borderStyle = "#007acc"; // 选中时边框样式
     public borderWidth = 2; // 选中时边框线宽
     public rotateControlDistance = 40; // 旋转点距离包围框矩形的距离
-    private _bound?: Rectangle; // 包围框，用于存储第一次计算出的包围框
 
     public constructor(position: Point) {
-        this.ctf = new CoordTransform(position, 1);
+        this.ctf = new CoordTransform(1);
     }
-    public getPosition() {
-        return this.ctf.worldOrigin;
-    }
-
     /**
      * 绘制当前entity
      */
@@ -40,12 +35,10 @@ abstract class Entity {
 
     /**
      * 包围框（世界坐标系）
+     * 这个每次获得，都要重新计算包围框，大大降低了效率，后期考虑改进
      */
     public get bound(): Rectangle {
-        if (!this._bound) {
-            this._bound = this.getBound();
-        }
-        return this._bound;
+        return this.getBound();
     }
 
     /**
@@ -271,9 +264,6 @@ abstract class Entity {
      */
     public zoom(originInDevice: Point, scale: number){
         this.ctf.zoom(originInDevice, scale);
-        // const newCtf = new CoordTransform(this.ctf.worldOrigin, this.ctf.worldToDevice_Len);
-        // newCtf.zoom(origin, scale);
-        // this.ctf = newCtf;
     }
 }
 
@@ -444,6 +434,7 @@ export class EntityCollection extends Entity {
     public constructor(entities: Entity[]) {
         super(new Point(0, 0));
         this.entities = entities;
+        this.ctf = new CoordTransform(1);
     }
     public draw(ctx: CanvasRenderingContext2D): void {
         for (let i = 0; i < this.entities.length; i++) {

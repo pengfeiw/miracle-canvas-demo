@@ -162,8 +162,16 @@ class MiracleMouseControl {
                 const origin = boundD.rd;
                 const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
                 const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.rd.x, 2) + Math.pow(boundD.lt.y - boundD.rd.y, 2));
-                
-                // console.log("zoomScale", zoomScale);
+
+                for (let i = 0; i < activeEntities.length; i++) {
+                    activeEntities[i].zoom(origin, zoomScale);
+                }
+            }
+
+            if (this.operator === Operator.ChangeEntitySizeLb) {
+                const origin = boundD.rt;
+                const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
+                const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.ld.x - boundD.rt.x, 2) + Math.pow(boundD.ld.y - boundD.rt.y, 2));
 
                 for (let i = 0; i < activeEntities.length; i++) {
                     activeEntities[i].zoom(origin, zoomScale);
@@ -357,6 +365,9 @@ class MiracleMouseControl {
                     this.MoveEntity(event);
                     break;
                 case Operator.ChangeEntitySizeLt:
+                    this.resizeEntity(event);
+                    break;
+                case Operator.ChangeEntitySizeLb:
                     this.resizeEntity(event);
                     break;
                 default:
