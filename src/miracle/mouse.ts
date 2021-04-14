@@ -147,13 +147,13 @@ class MiracleMouseControl {
             let boundD: Rectangle;
             if (this.activeCollection) {
                 const boundW = this.activeCollection.bound;
-                boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.location), 1 / this.activeCollection.ctf.worldToDevice_Len * boundW.width,
-                    1 / this.activeCollection.ctf.worldToDevice_Len * boundW.height);
+                boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.location), 1 / this.activeCollection.ctf.worldToDevice_Len_X * boundW.width,
+                    1 / this.activeCollection.ctf.worldToDevice_Len_Y * boundW.height);
             } else {
                 const entity = activeEntities[0];
                 const boundW = entity.bound;
-                boundD = new Rectangle(entity.ctf.worldToDevice_Point(boundW.location), 1 / entity.ctf.worldToDevice_Len * boundW.width,
-                    1 / entity.ctf.worldToDevice_Len * boundW.height);
+                boundD = new Rectangle(entity.ctf.worldToDevice_Point(boundW.location), 1 / entity.ctf.worldToDevice_Len_X * boundW.width,
+                    1 / entity.ctf.worldToDevice_Len_Y * boundW.height);
             }
 
             if (this.operator === Operator.ChangeEntitySizeLt) {
@@ -171,7 +171,7 @@ class MiracleMouseControl {
                 const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.rt.x, 2) + Math.pow(boundD.lt.y - boundD.rt.y, 2));
 
                 for (let i = 0; i < activeEntities.length; i++) {
-                    activeEntities[i].zoom(origin, zoomScale);
+                    activeEntities[i].zoomX(origin, zoomScale);
                 }
             }
             else if (this.operator === Operator.ChangeEntitySizeLb) {
@@ -188,7 +188,7 @@ class MiracleMouseControl {
                 const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
                 const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.ld.x, 2) + Math.pow(boundD.lt.y - boundD.ld.y, 2));
                 for (let i = 0; i < activeEntities.length; i++) {
-                    activeEntities[i].zoom(origin, zoomScale);
+                    activeEntities[i].zoomY(origin, zoomScale);
                 }
             }
             else if (this.operator === Operator.ChangeEntitySizeRb) {
@@ -204,7 +204,7 @@ class MiracleMouseControl {
                 const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
                 const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.rt.x, 2) + Math.pow(boundD.lt.y - boundD.rt.y, 2));
                 for (let i = 0; i < activeEntities.length; i++) {
-                    activeEntities[i].zoom(origin, zoomScale);
+                    activeEntities[i].zoomX(origin, zoomScale);
                 }
             }
             else if (this.operator === Operator.ChangeEntitySizeRt) {
@@ -220,7 +220,7 @@ class MiracleMouseControl {
                 const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
                 const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.ld.x, 2) + Math.pow(boundD.lt.y - boundD.ld.y, 2));
                 for (let i = 0; i < activeEntities.length; i++) {
-                    activeEntities[i].zoom(origin, zoomScale);
+                    activeEntities[i].zoomY(origin, zoomScale);
                 }
             }
             this.redraw();
@@ -332,8 +332,8 @@ class MiracleMouseControl {
 
             if (this.activeCollection) {
                 const boundW = this.activeCollection.bound;
-                const boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.lt), 1 / this.activeCollection.ctf.worldToDevice_Len * boundW.width,
-                    1 / this.activeCollection.ctf.worldToDevice_Len * boundW.height);
+                const boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.lt), 1 / this.activeCollection.ctf.worldToDevice_Len_X * boundW.width,
+                    1 / this.activeCollection.ctf.worldToDevice_Len_Y * boundW.height);
                 if (GraphicsAssist.isPointInRectangle(mousePoint, boundD)) {
                     document.body.style.cursor = "move";
                     this.operator = Operator.MoveEntity;
@@ -344,8 +344,8 @@ class MiracleMouseControl {
             for (let i = 0; i < this.entities.length; i++) {
                 const ent = this.entities[i];
                 const boundW = ent.bound;
-                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.lt), 1 / ent.ctf.worldToDevice_Len * boundW.width,
-                    1 / ent.ctf.worldToDevice_Len * boundW.height);
+                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.lt), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
+                    1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
 
                 // 鼠标位于entity包围框内，鼠标指针为"move"
                 if (GraphicsAssist.isPointInRectangle(mousePoint, boundD)) {
@@ -366,8 +366,8 @@ class MiracleMouseControl {
                 if (this.getActiveEntities().length > 0) {
                     const boundsD = this.getActiveEntities().map((ent) => {
                         const boundW = ent.bound;
-                        const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len * boundW.width,
-                            1 / ent.ctf.worldToDevice_Len * boundW.height);
+                        const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
+                            1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
                         return boundD;
                     });
 
@@ -443,8 +443,8 @@ class MiracleMouseControl {
             for (let i = 0; i < this.entities.length; i++) {
                 const ent = this.entities[i];
                 const boundW = ent.bound;
-                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len * boundW.width,
-                    1 / ent.ctf.worldToDevice_Len * boundW.height);
+                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
+                    1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
                 if (Rectangle.intersection([this.dynamicRect, boundD])) {
                     ent.isActive = true;
                 }

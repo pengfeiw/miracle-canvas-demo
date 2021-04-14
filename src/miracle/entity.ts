@@ -171,7 +171,7 @@ abstract class Entity {
                 case ControlStyle.Circle:
                     const ow = worldPoint;
                     const od = this.ctf.worldToDevice_Point(ow);
-                    const sizeD = 1 / this.ctf.worldToDevice_Len * this.controlSize * 0.5;
+                    const sizeD = this.controlSize * 0.5;
                     ctx.beginPath();
                     ctx.ellipse(od.x, od.y, sizeD * 0.5, sizeD * 0.5, 0, 0, 2 * Math.PI);
                     ctx.fill();
@@ -233,6 +233,20 @@ abstract class Entity {
      */
     public zoom(originInDevice: Point, scale: number) {
         this.ctf.zoom(originInDevice, scale);
+    }
+
+    /**
+     * 缩放X方向
+     */
+    public zoomX(originInDevice: Point, scale: number) {
+        this.ctf.zoomX(originInDevice, scale);
+    }
+
+    /**
+     * 缩放Y方向
+     */
+    public zoomY(originInDevice: Point, scale: number) {
+        this.ctf.zoomY(originInDevice, scale);
     }
 }
 
@@ -364,8 +378,8 @@ export class Circle extends Shape {
         ctx.lineWidth = this.lineW;
 
         const o = this.ctf.worldToDevice_Point(this.center);
-        const r1 = 1 / this.ctf.worldToDevice_Len * this.radiusX;
-        const r2 = 1 / this.ctf.worldToDevice_Len * this.radiusY;
+        const r1 = 1 / this.ctf.worldToDevice_Len_X * this.radiusX;
+        const r2 = 1 / this.ctf.worldToDevice_Len_Y * this.radiusY;
 
         ctx.beginPath();
         ctx.ellipse(o.x, o.y, r1, r2, 0, 0, 2 * Math.PI);
@@ -416,8 +430,8 @@ export class EntityCollection extends Entity {
     protected getBound(): Rectangle {
         const boundsD = this.entities.map((ent) => {
             const boundW = ent.bound;
-            const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len * boundW.width,
-                1 / ent.ctf.worldToDevice_Len * boundW.height);
+            const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
+                1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
             return boundD;
         });
 
