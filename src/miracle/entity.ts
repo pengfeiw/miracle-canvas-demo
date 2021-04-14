@@ -19,10 +19,14 @@ abstract class Entity {
     public borderStyle = "#007acc"; // 选中时边框样式
     public borderWidth = 2; // 选中时边框线宽
     public rotateControlDistance = 40; // 旋转点距离包围框矩形的距离
-
     public constructor(position: Point) {
         this.ctf = new CoordTransform(1);
     }
+
+    public get rotateOrigin() {
+        return this.ctf.base;
+    }
+
     /**
      * 绘制当前entity
      */
@@ -33,6 +37,11 @@ abstract class Entity {
      */
     protected abstract getBound(): Rectangle;
 
+    /**
+     * 设置旋转中心
+     */
+    protected abstract setRotateOrigin(originW: Point): void;
+    
     /**
      * 包围框（世界坐标系）
      * 这个每次获得，都要重新计算包围框，大大降低了效率，后期考虑改进
@@ -248,6 +257,15 @@ abstract class Entity {
     public zoomY(originInDevice: Point, scale: number) {
         this.ctf.zoomY(originInDevice, scale);
     }
+
+    /**
+     * 顺时针旋转
+     * @param originInDevice 旋转中心
+     * @param angle 旋转角度（弧度值）
+     */
+    public rotateClockwise(originInDevice: Point, angle: number) {
+        
+    }
 }
 
 /**
@@ -267,6 +285,9 @@ export class Image extends Entity {
         throw new Error("Method not implemented.");
     }
     public getBound(): Rectangle {
+        throw new Error("Method not implemented.");
+    }
+    protected setRotateOrigin(originW: Point): void {
         throw new Error("Method not implemented.");
     }
 }
@@ -299,6 +320,7 @@ export class PolyShape extends Shape {
         super();
         this.vertexs = vertexs;
         this.closed = closed;
+        this.setRotateOrigin(GraphicsAssist.mid(this.bound.lt, this.bound.rd));
     }
 
     /**
@@ -354,6 +376,18 @@ export class PolyShape extends Shape {
     public getBound(): Rectangle {
         return Rectangle.bound(this.vertexs);
     }
+    /**
+     * 设置旋转中心
+     */
+    protected setRotateOrigin(originW: Point): void {
+        for (let i = 0; i < this.vertexs.length; i++) {
+            const dx = this.vertexs[i].x - originW.x;
+            const dy = this.vertexs[i].y - originW.y;
+            this.vertexs[i] = new Point(dx, dy);
+        }
+
+        this.ctf.base = originW;
+    }
 }
 
 /**
@@ -369,6 +403,8 @@ export class Circle extends Shape {
         this.center = center;
         this.radiusX = radius1;
         this.radiusY = radius2 ?? radius1;
+        
+        this.setRotateOrigin(GraphicsAssist.mid(this.bound.lt, this.bound.rd));
     }
 
     public draw(ctx: CanvasRenderingContext2D): void {
@@ -403,6 +439,12 @@ export class Circle extends Shape {
     public getBound(): Rectangle {
         return new Rectangle(new Point(this.center.x - this.radiusX, this.center.y - this.radiusY), 2 * this.radiusX, 2 * this.radiusY);
     }
+    protected setRotateOrigin(originW: Point): void {
+        const dx = this.center.x - originW.x;
+        const dy = this.center.y - originW.y;
+        this.center = new Point(dx, dy);
+        this.ctf.base = originW;
+    }
 }
 
 /**
@@ -436,6 +478,9 @@ export class EntityCollection extends Entity {
         });
 
         return Rectangle.union(boundsD);
+    }
+    protected setRotateOrigin(originW: Point): void {
+        throw new Error("Method not implemented.");
     }
 }
 

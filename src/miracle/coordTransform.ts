@@ -3,10 +3,23 @@ import {Point, Vector} from "./graphic";
 export default class CoordTransform {
     private _worldToDevice_Len_X: number; // x方向：这里叫x方向其实是不准确的，应该是主方向，在角度为0的时候为x方向。
     private _worldToDevice_Len_Y: number; // y方向：这里叫y方向其实是不准确的，应该是副方向，在角度为0的时候为y方向。
+    private angle: number; // 旋转角度
     private basePoint_world = new Point(0, 0); // 基点（世界坐标系）
+
+    /**
+     * 设置基点（图的旋转中心）
+     * @param point 
+     */
+    public get base() {
+        return this.basePoint_world;
+    }
+    public set base(value: Point) {
+        this.basePoint_world = value;
+    }
     public constructor(scale: number = 1) {
         this._worldToDevice_Len_X = 1 / scale;
         this._worldToDevice_Len_Y = 1 / scale;
+        this.angle = 0;
     }
     public get worldToDevice_Len_X() {
         return this._worldToDevice_Len_X;
