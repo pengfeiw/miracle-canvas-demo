@@ -268,7 +268,8 @@ export namespace GraphicsAssist {
         const area4 = Vector.multiProduct_Len(vectLtp, vectRtp) * 0.5;
         const areaRect = rect.height * rect.width;
 
-        if (area1 + area2 + area3 + area4 === areaRect) {
+        // 精度控制在0.1
+        if (Math.abs(area1 + area2 + area3 + area4 - areaRect) < 0.1) {
             return true;
         }
         return false;
