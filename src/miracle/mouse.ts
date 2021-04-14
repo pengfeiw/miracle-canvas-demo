@@ -1,4 +1,3 @@
-import CoordTransform from "./coordTransform";
 import Entity, {EntityCollection} from "./entity";
 import {Rectangle, Point, GraphicsAssist, Vector} from "./graphic";
 
@@ -150,12 +149,12 @@ class MiracleMouseControl {
             if (this.activeCollection) {
                 const boundW = this.activeCollection.bound;
                 boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.location), 1 / this.activeCollection.ctf.worldToDevice_Len * boundW.width,
-                1 / this.activeCollection.ctf.worldToDevice_Len * boundW.height);
+                    1 / this.activeCollection.ctf.worldToDevice_Len * boundW.height);
             } else {
                 const entity = activeEntities[0];
                 const boundW = entity.bound;
                 boundD = new Rectangle(entity.ctf.worldToDevice_Point(boundW.location), 1 / entity.ctf.worldToDevice_Len * boundW.width,
-                1 / entity.ctf.worldToDevice_Len * boundW.height);
+                    1 / entity.ctf.worldToDevice_Len * boundW.height);
             }
 
             if (this.operator === Operator.ChangeEntitySizeLt) {
@@ -167,12 +166,60 @@ class MiracleMouseControl {
                     activeEntities[i].zoom(origin, zoomScale);
                 }
             }
+            else if (this.operator === Operator.ChangeEntitySizeLm) {
+                const origin = GraphicsAssist.mid(boundD.rt, boundD.rd);
+                const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
+                const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.rt.x, 2) + Math.pow(boundD.lt.y - boundD.rt.y, 2));
 
-            if (this.operator === Operator.ChangeEntitySizeLb) {
+                for (let i = 0; i < activeEntities.length; i++) {
+                    activeEntities[i].zoom(origin, zoomScale);
+                }
+            }
+            else if (this.operator === Operator.ChangeEntitySizeLb) {
                 const origin = boundD.rt;
                 const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
                 const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.ld.x - boundD.rt.x, 2) + Math.pow(boundD.ld.y - boundD.rt.y, 2));
 
+                for (let i = 0; i < activeEntities.length; i++) {
+                    activeEntities[i].zoom(origin, zoomScale);
+                }
+            }
+            else if (this.operator === Operator.ChangeEntitySizeMb) {
+                const origin = GraphicsAssist.mid(boundD.lt, boundD.rt);
+                const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
+                const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.ld.x, 2) + Math.pow(boundD.lt.y - boundD.ld.y, 2));
+                for (let i = 0; i < activeEntities.length; i++) {
+                    activeEntities[i].zoom(origin, zoomScale);
+                }
+            }
+            else if (this.operator === Operator.ChangeEntitySizeRb) {
+                const origin = boundD.lt;
+                const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
+                const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.rd.x, 2) + Math.pow(boundD.lt.y - boundD.rd.y, 2));
+                for (let i = 0; i < activeEntities.length; i++) {
+                    activeEntities[i].zoom(origin, zoomScale);
+                }
+            }
+            else if (this.operator === Operator.ChangeEntitySizeRm) {
+                const origin = GraphicsAssist.mid(boundD.lt, boundD.ld);
+                const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
+                const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.rt.x, 2) + Math.pow(boundD.lt.y - boundD.rt.y, 2));
+                for (let i = 0; i < activeEntities.length; i++) {
+                    activeEntities[i].zoom(origin, zoomScale);
+                }
+            }
+            else if (this.operator === Operator.ChangeEntitySizeRt) {
+                const origin = boundD.ld;
+                const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
+                const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.rd.x, 2) + Math.pow(boundD.lt.y - boundD.rd.y, 2));
+                for (let i = 0; i < activeEntities.length; i++) {
+                    activeEntities[i].zoom(origin, zoomScale);
+                }
+            }
+            else if (this.operator === Operator.ChangeEntitySizeMt) {
+                const origin = GraphicsAssist.mid(boundD.ld, boundD.rd);
+                const cursorDisToOrigin = Math.sqrt(Math.pow(event.offsetX - origin.x, 2) + Math.pow(event.offsetY - origin.y, 2));
+                const zoomScale = cursorDisToOrigin / Math.sqrt(Math.pow(boundD.lt.x - boundD.ld.x, 2) + Math.pow(boundD.lt.y - boundD.ld.y, 2));
                 for (let i = 0; i < activeEntities.length; i++) {
                     activeEntities[i].zoom(origin, zoomScale);
                 }
@@ -204,9 +251,7 @@ class MiracleMouseControl {
                     entity = activeEntities[0];
                 }
 
-                const isMouseInControlBound = (ctf: CoordTransform, ctrBoundW: Rectangle) => {
-                    const ctrBoundD = new Rectangle(ctf.worldToDevice_Point(ctrBoundW.location), 1 / ctf.worldToDevice_Len * ctrBoundW.width,
-                        ctf.worldToDevice_Len * ctrBoundW.height);
+                const isMouseInControlBound = (ctrBoundD: Rectangle) => {
                     if (GraphicsAssist.isPointInRectangle(mousePoint, ctrBoundD)) {
                         return true;
                     }
@@ -214,72 +259,72 @@ class MiracleMouseControl {
                 }
 
                 // 左上角控制点
-                const ltCtrBoundW = entity.getControlBound_lt();
-                if (isMouseInControlBound(entity.ctf, ltCtrBoundW)) {
+                const ltCtrBoundD = entity.getControlBound_lt_device();
+                if (isMouseInControlBound(ltCtrBoundD)) {
                     document.body.style.cursor = "nwse-resize";
                     this.operator = Operator.ChangeEntitySizeLt;
                     return;
                 }
 
                 // 左中
-                const lmCtrBoundW = entity.getControlBound_lm();
-                if (isMouseInControlBound(entity.ctf, lmCtrBoundW)) {
+                const lmCtrBoundD = entity.getControlBound_lm_device();
+                if (isMouseInControlBound(lmCtrBoundD)) {
                     document.body.style.cursor = "ew-resize";
                     this.operator = Operator.ChangeEntitySizeLm;
                     return;
                 }
 
                 // 左下
-                const lbCtrBoundW = entity.getControlBound_lb();
-                if (isMouseInControlBound(entity.ctf, lbCtrBoundW)) {
+                const lbCtrBoundD = entity.getControlBound_lb_device();
+                if (isMouseInControlBound(lbCtrBoundD)) {
                     document.body.style.cursor = "nesw-resize";
                     this.operator = Operator.ChangeEntitySizeLb;
                     return;
                 }
 
                 // 中下
-                const MbCtrBoundW = entity.getControlBound_bm();
-                if (isMouseInControlBound(entity.ctf, MbCtrBoundW)) {
+                const MbCtrBoundD = entity.getControlBound_bm_device();
+                if (isMouseInControlBound(MbCtrBoundD)) {
                     document.body.style.cursor = "ns-resize";
                     this.operator = Operator.ChangeEntitySizeMb;
                     return;
                 }
 
                 // 右下
-                const RbCtrBoundW = entity.getControlBound_rb();
-                if (isMouseInControlBound(entity.ctf, RbCtrBoundW)) {
+                const RbCtrBoundW = entity.getControlBound_rb_device();
+                if (isMouseInControlBound(RbCtrBoundW)) {
                     document.body.style.cursor = "nwse-resize";
                     this.operator = Operator.ChangeEntitySizeRb;
                     return;
                 }
 
                 // 右中
-                const RmCtrBoundW = entity.getControlBound_rm();
-                if (isMouseInControlBound(entity.ctf, RmCtrBoundW)) {
+                const RmCtrBoundD = entity.getControlBound_rm_device();
+                if (isMouseInControlBound(RmCtrBoundD)) {
                     document.body.style.cursor = "ew-resize";
-                    this.operator = Operator.ChangeEntitySizeRb;
+                    this.operator = Operator.ChangeEntitySizeRm;
                     return;
                 }
 
                 // 右上
-                const RtCtrBoundW = entity.getControlBound_rt();
-                if (isMouseInControlBound(entity.ctf, RtCtrBoundW)) {
+                const RtCtrBoundD = entity.getControlBound_rt_device();
+                if (isMouseInControlBound(RtCtrBoundD)) {
                     document.body.style.cursor = "nesw-resize";
                     this.operator = Operator.ChangeEntitySizeRt;
                     return;
                 }
 
                 // 中上
-                const MtCtrBoundW = entity.getControlBound_tm();
-                if (isMouseInControlBound(entity.ctf, MtCtrBoundW)) {
+                const MtCtrBoundD = entity.getControlBound_tm_device();
+                if (isMouseInControlBound(MtCtrBoundD)) {
                     document.body.style.cursor = "ns-resize";
                     this.operator = Operator.ChangeEntitySizeMt;
                     return;
                 }
 
                 // 旋转点
-                const rotateCtrBoundW = entity.getControlBound_rotate();
-                if (isMouseInControlBound(entity.ctf, rotateCtrBoundW)) {
+                const rotateCtrBoundD = entity.getControlBound_rotate();
+                if (isMouseInControlBound(rotateCtrBoundD)) {
                     document.body.style.cursor = "crosshair";
                     this.operator = Operator.RotateEntity;
                     return;
@@ -368,6 +413,24 @@ class MiracleMouseControl {
                     this.resizeEntity(event);
                     break;
                 case Operator.ChangeEntitySizeLb:
+                    this.resizeEntity(event);
+                    break;
+                case Operator.ChangeEntitySizeLm:
+                    this.resizeEntity(event);
+                    break;
+                case Operator.ChangeEntitySizeMb:
+                    this.resizeEntity(event);
+                    break;
+                case Operator.ChangeEntitySizeRb:
+                    this.resizeEntity(event);
+                    break;
+                case Operator.ChangeEntitySizeRm:
+                    this.resizeEntity(event);
+                    break;
+                case Operator.ChangeEntitySizeRt:
+                    this.resizeEntity(event);
+                    break;
+                case Operator.ChangeEntitySizeMt:
                     this.resizeEntity(event);
                     break;
                 default:

@@ -40,6 +40,7 @@ const App = () => {
             triangle.closed = true;
             triangle.fillStyle = "gray";
             miracle.addEntity(rect, circle, triangle);
+            // miracle.addEntity(circle);
         }
     }, [miracle]);
     return (

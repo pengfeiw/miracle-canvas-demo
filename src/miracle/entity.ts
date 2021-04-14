@@ -42,103 +42,75 @@ abstract class Entity {
     }
 
     /**
-     * 获得未禁用的控制点包围框（世界坐标系）
+     * 获得left middle控制点包围框（设备坐标系）
      */
-    public getEnableControlPointsBound(): Rectangle[] {
-        const res: Rectangle[] = [];
-        // x控制点
-        if (!this.xLocked) {
-            res.push(this.getControlBound_lm());
-            res.push(this.getControlBound_rm());
-        }
-
-        // y控制点
-        if (!this.yLocked) {
-            res.push(this.getControlBound_tm());
-            res.push(this.getControlBound_bm());
-        }
-
-        // 顶点处控制点
-        if (!this.diagLocked) {
-            res.push(this.getControlBound_lt());
-            res.push(this.getControlBound_rt());
-            res.push(this.getControlBound_lb());
-            res.push(this.getControlBound_rb());
-        }
-
-        // 旋转点
-        if (!this.rotateLocked) {
-            res.push(this.getControlBound_rotate());
-        }
-        return res;
+    public getControlBound_lm_device(): Rectangle {
+        const controlPointW = GraphicsAssist.mid(this.bound.lt, this.bound.ld);
+        const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
+        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
     }
 
     /**
-     * 获得left middle控制点包围框（世界坐标系）
+     * 获得right middle控制点包围框（设备坐标系）
      */
-    public getControlBound_lm(): Rectangle {
-        const controlPoint = GraphicsAssist.mid(this.bound.lt, this.bound.ld);
-
-        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    public getControlBound_rm_device(): Rectangle {
+        const controlPointW = GraphicsAssist.mid(this.bound.rt, this.bound.rd);
+        const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
+        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
     }
 
     /**
-     * 获得right middle控制点包围框（世界坐标系）
+     * 获得top middle控制点包围框（设备坐标系）
      */
-    public getControlBound_rm(): Rectangle {
-        const controlPoint = GraphicsAssist.mid(this.bound.rt, this.bound.rd);
-
-        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    public getControlBound_tm_device(): Rectangle {
+        const controlPointW = GraphicsAssist.mid(this.bound.lt, this.bound.rt);
+        const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
+        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
     }
 
     /**
-     * 获得top middle控制点包围框（世界坐标系）
+     * 获得bottom middle控制点包围框（设备坐标系）
      */
-    public getControlBound_tm(): Rectangle {
-        const controlPoint = GraphicsAssist.mid(this.bound.lt, this.bound.rt);
-
-        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    public getControlBound_bm_device(): Rectangle {
+        const controlPointW = GraphicsAssist.mid(this.bound.ld, this.bound.rd);
+        const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
+        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
     }
 
     /**
-     * 获得bottom middle控制点包围框（世界坐标系）
+     * 获得left top控制点包围框（设备坐标系）
      */
-    public getControlBound_bm(): Rectangle {
-        const controlPoint = GraphicsAssist.mid(this.bound.ld, this.bound.rd);
-
-        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    public getControlBound_lt_device(): Rectangle {
+        const controlPointW = this.bound.lt;
+        const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
+        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
     }
 
     /**
-     * 获得left top控制点包围框（世界坐标系）
+     * 获得left top控制点包围框（设备坐标系）
      */
-    public getControlBound_lt(): Rectangle {
-        const controlPoint = this.bound.lt;
-        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    public getControlBound_rt_device(): Rectangle {
+        const controlPointW = this.bound.rt;
+        const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
+        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
     }
 
     /**
-     * 获得left top控制点包围框（世界坐标系）
+     * 获得left bottom控制点包围框（设备坐标系）
      */
-    public getControlBound_rt(): Rectangle {
-        const controlPoint = this.bound.rt;
-        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    public getControlBound_lb_device(): Rectangle {
+        const controlPointW = this.bound.ld;
+        const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
+        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
     }
 
     /**
-     * 获得left bottom控制点包围框（世界坐标系）
+     * 获得right bottom控制点包围框（设备坐标系）
      */
-    public getControlBound_lb(): Rectangle {
-        const controlPoint = this.bound.ld;
-        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
-    }
-
-    /**
-     * 获得right bottom控制点包围框（世界坐标系）
-     */
-    public getControlBound_rb(): Rectangle {
-        const controlPoint = this.bound.rd;
-        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+    public getControlBound_rb_device(): Rectangle {
+        const controlPointW = this.bound.rd;
+        const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
+        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
     }
 
     /**
@@ -146,9 +118,9 @@ abstract class Entity {
      */
     public getControlBound_rotate(): Rectangle {
         const tm = GraphicsAssist.mid(this.bound.lt, this.bound.rt);
-        const controlPoint = new Point(tm.x, tm.y - this.rotateControlDistance);
-
-        return new Rectangle(new Point(controlPoint.x - this.controlSize * 0.5, controlPoint.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        const controlPointW = new Point(tm.x, tm.y - this.rotateControlDistance);
+        const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
+        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
     }
 
     /**
@@ -180,16 +152,12 @@ abstract class Entity {
         const drawControlPoint = (ctx: CanvasRenderingContext2D, worldPoint: Point) => {
             switch (this.controlStyle) {
                 case ControlStyle.Rectangle:
-                    // 世界坐标点
-                    const ltw = new Point(worldPoint.x - this.controlSize * 0.5, worldPoint.y - this.controlSize * 0.5);
-                    const ldw = new Point(worldPoint.x - this.controlSize * 0.5, worldPoint.y + this.controlSize * 0.5);
-                    const rdw = new Point(worldPoint.x + this.controlSize * 0.5, worldPoint.y + this.controlSize * 0.5);
-                    const rtw = new Point(worldPoint.x + this.controlSize * 0.5, worldPoint.y - this.controlSize * 0.5);
                     // 设备坐标点
-                    const ltd = this.ctf.worldToDevice_Point(ltw);
-                    const ldd = this.ctf.worldToDevice_Point(ldw);
-                    const rdd = this.ctf.worldToDevice_Point(rdw);
-                    const rtd = this.ctf.worldToDevice_Point(rtw);
+                    const devicePoint = this.ctf.worldToDevice_Point(worldPoint);
+                    const ltd = new Point(devicePoint.x - this.controlSize * 0.5, devicePoint.y - this.controlSize * 0.5);
+                    const ldd = new Point(devicePoint.x - this.controlSize * 0.5, devicePoint.y + this.controlSize * 0.5);
+                    const rdd = new Point(devicePoint.x + this.controlSize * 0.5, devicePoint.y + this.controlSize * 0.5);
+                    const rtd = new Point(devicePoint.x + this.controlSize * 0.5, devicePoint.y - this.controlSize * 0.5);
                     // 绘制
                     ctx.beginPath();
                     ctx.moveTo(ltd.x, ltd.y);
@@ -262,7 +230,7 @@ abstract class Entity {
     /**
      * 缩放
      */
-    public zoom(originInDevice: Point, scale: number){
+    public zoom(originInDevice: Point, scale: number) {
         this.ctf.zoom(originInDevice, scale);
     }
 }
