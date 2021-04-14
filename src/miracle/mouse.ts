@@ -144,7 +144,6 @@ class MiracleMouseControl {
     private resizeEntity = (event: MouseEvent) => {
         const activeEntities = this.getActiveEntities();
         if (activeEntities.length > 0) {
-            // const moveLen = Math.sqrt(event.movementX * event.movementX + event.movementY * event.movementY);
             let boundD: Rectangle;
             if (this.activeCollection) {
                 const boundW = this.activeCollection.bound;
@@ -291,8 +290,8 @@ class MiracleMouseControl {
                 }
 
                 // 右下
-                const RbCtrBoundW = entity.getControlBound_rb_device();
-                if (isMouseInControlBound(RbCtrBoundW)) {
+                const RbCtrBoundD = entity.getControlBound_rb_device();
+                if (isMouseInControlBound(RbCtrBoundD)) {
                     document.body.style.cursor = "nwse-resize";
                     this.operator = Operator.ChangeEntitySizeRb;
                     return;
@@ -333,7 +332,7 @@ class MiracleMouseControl {
 
             if (this.activeCollection) {
                 const boundW = this.activeCollection.bound;
-                const boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.location), 1 / this.activeCollection.ctf.worldToDevice_Len * boundW.width,
+                const boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.lt), 1 / this.activeCollection.ctf.worldToDevice_Len * boundW.width,
                     1 / this.activeCollection.ctf.worldToDevice_Len * boundW.height);
                 if (GraphicsAssist.isPointInRectangle(mousePoint, boundD)) {
                     document.body.style.cursor = "move";
@@ -345,7 +344,7 @@ class MiracleMouseControl {
             for (let i = 0; i < this.entities.length; i++) {
                 const ent = this.entities[i];
                 const boundW = ent.bound;
-                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len * boundW.width,
+                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.lt), 1 / ent.ctf.worldToDevice_Len * boundW.width,
                     1 / ent.ctf.worldToDevice_Len * boundW.height);
 
                 // 鼠标位于entity包围框内，鼠标指针为"move"

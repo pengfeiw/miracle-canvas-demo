@@ -135,6 +135,7 @@ abstract class Entity {
         const boundRectLdd = this.ctf.worldToDevice_Point(boundRect.ld);
         const boundRectRtd = this.ctf.worldToDevice_Point(boundRect.rt);
         const boundRectRdd = this.ctf.worldToDevice_Point(boundRect.rd);
+
         ctx.beginPath();
         ctx.moveTo(boundRectLtd.x, boundRectLtd.y);
         ctx.lineTo(boundRectLdd.x, boundRectLdd.y);
@@ -254,10 +255,6 @@ export class Image extends Entity {
     public getBound(): Rectangle {
         throw new Error("Method not implemented.");
     }
-
-    // public getControlPointsBound(): Point[] {
-    //     throw new Error("Method not implemented.");
-    // }
 }
 
 /**
