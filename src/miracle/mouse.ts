@@ -158,9 +158,10 @@ class MiracleMouseControl {
                     1 / this.activeCollection.ctf.worldToDevice_Len_Y * boundW.height);
             } else {
                 const entity = activeEntities[0];
-                const boundW = entity.bound;
-                boundD = new Rectangle(entity.ctf.worldToDevice_Point(boundW.location), 1 / entity.ctf.worldToDevice_Len_X * boundW.width,
-                    1 / entity.ctf.worldToDevice_Len_Y * boundW.height);
+                // const boundW = entity.bound;
+                // boundD = new Rectangle(entity.ctf.worldToDevice_Point(boundW.location), 1 / entity.ctf.worldToDevice_Len_X * boundW.width,
+                //     1 / entity.ctf.worldToDevice_Len_Y * boundW.height);
+                boundD = entity.boundD;
             }
 
             if (this.operator === Operator.ChangeEntitySizeLt) {
@@ -237,7 +238,7 @@ class MiracleMouseControl {
     private rotateEntity = (event: MouseEvent) => {
         const activeEntities = this.getActiveEntities();
         if (activeEntities.length > 0) {
-            for (let i = 0; i <activeEntities.length; i++) {
+            for (let i = 0; i < activeEntities.length; i++) {
                 activeEntities[i].rotateAnticlockwise(Math.PI / 18);
             }
         }
@@ -274,76 +275,83 @@ class MiracleMouseControl {
                     return false;
                 }
 
-                // 左上角控制点
-                const ltCtrBoundD = entity.getControlBound_lt_device();
-                if (isMouseInControlBound(ltCtrBoundD)) {
-                    document.body.style.cursor = "nwse-resize";
-                    this.operator = Operator.ChangeEntitySizeLt;
-                    return;
+                if (!entity.diagLocked) {
+                    // 左上角控制点
+                    const ltCtrBoundD = entity.getControlBound_lt_device();
+                    if (isMouseInControlBound(ltCtrBoundD)) {
+                        document.body.style.cursor = "pointer";
+                        this.operator = Operator.ChangeEntitySizeLt;
+                        return;
+                    }
+                    // 左下
+                    const lbCtrBoundD = entity.getControlBound_lb_device();
+                    if (isMouseInControlBound(lbCtrBoundD)) {
+                        document.body.style.cursor = "pointer";
+                        this.operator = Operator.ChangeEntitySizeLb;
+                        return;
+                    }
+
+                    // 右下
+                    const RbCtrBoundD = entity.getControlBound_rb_device();
+                    if (isMouseInControlBound(RbCtrBoundD)) {
+                        document.body.style.cursor = "pointer";
+                        this.operator = Operator.ChangeEntitySizeRb;
+                        return;
+                    }
+
+                    // 右上
+                    const RtCtrBoundD = entity.getControlBound_rt_device();
+                    if (isMouseInControlBound(RtCtrBoundD)) {
+                        document.body.style.cursor = "pointer";
+                        this.operator = Operator.ChangeEntitySizeRt;
+                        return;
+                    }
                 }
 
-                // 左中
-                const lmCtrBoundD = entity.getControlBound_lm_device();
-                if (isMouseInControlBound(lmCtrBoundD)) {
-                    document.body.style.cursor = "ew-resize";
-                    this.operator = Operator.ChangeEntitySizeLm;
-                    return;
+                if (!entity.xLocked) {
+                    // 左中
+                    const lmCtrBoundD = entity.getControlBound_lm_device();
+                    if (isMouseInControlBound(lmCtrBoundD)) {
+                        document.body.style.cursor = "pointer";
+                        this.operator = Operator.ChangeEntitySizeLm;
+                        return;
+                    }
+
+                    // 右中
+                    const RmCtrBoundD = entity.getControlBound_rm_device();
+                    if (isMouseInControlBound(RmCtrBoundD)) {
+                        document.body.style.cursor = "pointer";
+                        this.operator = Operator.ChangeEntitySizeRm;
+                        return;
+                    }
                 }
 
-                // 左下
-                const lbCtrBoundD = entity.getControlBound_lb_device();
-                if (isMouseInControlBound(lbCtrBoundD)) {
-                    document.body.style.cursor = "nesw-resize";
-                    this.operator = Operator.ChangeEntitySizeLb;
-                    return;
+                if (!entity.yLocked) {
+                    // 中下
+                    const MbCtrBoundD = entity.getControlBound_bm_device();
+                    if (isMouseInControlBound(MbCtrBoundD)) {
+                        document.body.style.cursor = "pointer";
+                        this.operator = Operator.ChangeEntitySizeMb;
+                        return;
+                    }
+
+                    // 中上
+                    const MtCtrBoundD = entity.getControlBound_tm_device();
+                    if (isMouseInControlBound(MtCtrBoundD)) {
+                        document.body.style.cursor = "pointer";
+                        this.operator = Operator.ChangeEntitySizeMt;
+                        return;
+                    }
                 }
 
-                // 中下
-                const MbCtrBoundD = entity.getControlBound_bm_device();
-                if (isMouseInControlBound(MbCtrBoundD)) {
-                    document.body.style.cursor = "ns-resize";
-                    this.operator = Operator.ChangeEntitySizeMb;
-                    return;
-                }
-
-                // 右下
-                const RbCtrBoundD = entity.getControlBound_rb_device();
-                if (isMouseInControlBound(RbCtrBoundD)) {
-                    document.body.style.cursor = "nwse-resize";
-                    this.operator = Operator.ChangeEntitySizeRb;
-                    return;
-                }
-
-                // 右中
-                const RmCtrBoundD = entity.getControlBound_rm_device();
-                if (isMouseInControlBound(RmCtrBoundD)) {
-                    document.body.style.cursor = "ew-resize";
-                    this.operator = Operator.ChangeEntitySizeRm;
-                    return;
-                }
-
-                // 右上
-                const RtCtrBoundD = entity.getControlBound_rt_device();
-                if (isMouseInControlBound(RtCtrBoundD)) {
-                    document.body.style.cursor = "nesw-resize";
-                    this.operator = Operator.ChangeEntitySizeRt;
-                    return;
-                }
-
-                // 中上
-                const MtCtrBoundD = entity.getControlBound_tm_device();
-                if (isMouseInControlBound(MtCtrBoundD)) {
-                    document.body.style.cursor = "ns-resize";
-                    this.operator = Operator.ChangeEntitySizeMt;
-                    return;
-                }
-
-                // 旋转点
-                const rotateCtrBoundD = entity.getControlBound_rotate();
-                if (isMouseInControlBound(rotateCtrBoundD)) {
-                    document.body.style.cursor = "crosshair";
-                    this.operator = Operator.RotateEntity;
-                    return;
+                if (!entity.rotateLocked) {
+                    // 旋转点
+                    const rotateCtrBoundD = entity.getControlBound_rotate();
+                    if (isMouseInControlBound(rotateCtrBoundD)) {
+                        document.body.style.cursor = "crosshair";
+                        this.operator = Operator.RotateEntity;
+                        return;
+                    }
                 }
             }
 
@@ -361,7 +369,7 @@ class MiracleMouseControl {
             for (let i = 0; i < this.entities.length; i++) {
                 const ent = this.entities[i];
                 const boundD = ent.boundD;
-                
+
                 // // 测试 ---绘制屏幕包围框
                 // const ctx = this.canvas.getContext("2d");
                 // if (ctx) {
@@ -478,7 +486,7 @@ class MiracleMouseControl {
             for (let i = 0; i < this.entities.length; i++) {
                 const ent = this.entities[i];
                 const boundD = ent.boundD;
-                const mouseRect = new Rectangle(GraphicsAssist.mid(this.dynamicRect.lt, this.dynamicRect.rd), this.dynamicRect.rd.x - this.dynamicRect.lt.x, 
+                const mouseRect = new Rectangle(GraphicsAssist.mid(this.dynamicRect.lt, this.dynamicRect.rd), this.dynamicRect.rd.x - this.dynamicRect.lt.x,
                     this.dynamicRect.rd.y - this.dynamicRect.lt.y);
                 if (Rectangle.intersection(mouseRect, boundD)) {
                     ent.isActive = true;

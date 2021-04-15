@@ -1,7 +1,7 @@
 /**
  * 极坐标
  */
-interface PolarCoord {
+export interface PolarCoord {
     angle: number; // 角度
     length: number; // 模长
 }

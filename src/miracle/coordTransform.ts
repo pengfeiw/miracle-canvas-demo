@@ -1,4 +1,4 @@
-import {GraphicsAssist, Point, Vector} from "./graphic";
+import {GraphicsAssist, Point, Vector, PolarCoord} from "./graphic";
 
 export default class CoordTransform {
     private _worldToDevice_Len_X: number; // x方向：这里叫x方向其实是不准确的，应该是主方向，在角度为0的时候为x方向。
@@ -56,17 +56,47 @@ export default class CoordTransform {
      * @param zoomScale 缩放比例
      */
     public zoom = (deviceZoomOrigin: Point, zoomScale: number) => {
+        // // 因为引入了角度，所以如果要改变x（主方向）和y（副方向）方向，需要将deviceZoomOrigin先恢复到angle为0的点
+        // const newOrigin = GraphicsAssist.rotatePoint(this.basePoint_world, deviceZoomOrigin, -this.anticlockwiseAngle);
+
+        // this._worldToDevice_Len_X = this._worldToDevice_Len_X * 1 / zoomScale;
+        // this._worldToDevice_Len_Y = this._worldToDevice_Len_Y * 1 / zoomScale;
+
+        // // 更改基点位置
+        // let dx = this.basePoint_world.x - newOrigin.x;
+        // let dy = this.basePoint_world.y - newOrigin.y;
+
+        // dx *= zoomScale;
+        // dy *= zoomScale;
+
+        // this.basePoint_world = new Point(newOrigin.x + dx, newOrigin.y + dy);
+
+        // // 因为引入了角度，所以如果要改变x（主方向）和y（副方向）方向，需要将deviceZoomOrigin先恢复到angle为0的点
+        const newOrigin = GraphicsAssist.rotatePoint(this.basePoint_world, deviceZoomOrigin, -this.anticlockwiseAngle);
         this._worldToDevice_Len_X = this._worldToDevice_Len_X * 1 / zoomScale;
         this._worldToDevice_Len_Y = this._worldToDevice_Len_Y * 1 / zoomScale;
 
-        // 更改基点位置
-        let dx = this.basePoint_world.x - deviceZoomOrigin.x;
-        let dy = this.basePoint_world.y - deviceZoomOrigin.y;
-        
+        let dx = this.basePoint_world.x - newOrigin.x;
         dx *= zoomScale;
+
+        let dy = this.basePoint_world.y - newOrigin.y;
         dy *= zoomScale;
 
-        this.basePoint_world = new Point(deviceZoomOrigin.x + dx, deviceZoomOrigin.y + dy);
+        // 主方向长度增加了dx长度，即basePoint_world向主方向平移了dx长度
+        const pointPolar: PolarCoord = {
+            length: dx,
+            angle: -this.anticlockwiseAngle
+        };
+        const point = GraphicsAssist.polarToCartesian(pointPolar);
+
+        // 副方向长度增加了dy长度，即basePoint_world向副方向平移了dx长度
+        const pointPolar2: PolarCoord = {
+            length: dy,
+            angle: -this.anticlockwiseAngle + Math.PI * 0.5
+        };
+        const point2 = GraphicsAssist.polarToCartesian(pointPolar2);
+
+        this.basePoint_world = new Point(deviceZoomOrigin.x + point.x + point2.x, deviceZoomOrigin.y + point.y + point2.y);
     };
 
     /**
@@ -75,11 +105,23 @@ export default class CoordTransform {
      * @param zoomScale 缩放比例
      */
     public zoomX = (deviceZoomOrigin: Point, zoomScale: number) => {
+        // 因为引入了角度，所以如果要改变x（主方向）和y（副方向）方向，需要将deviceZoomOrigin先恢复到angle为0的点
+        const newOrigin = GraphicsAssist.rotatePoint(this.basePoint_world, deviceZoomOrigin, -this.anticlockwiseAngle);
+
         this._worldToDevice_Len_X = this._worldToDevice_Len_X * 1 / zoomScale;
 
-        let dx = this.basePoint_world.x - deviceZoomOrigin.x;
+        let dx = this.basePoint_world.x - newOrigin.x;
         dx *= zoomScale;
-        this.basePoint_world = new Point(deviceZoomOrigin.x + dx, this.basePoint_world.y);
+
+        // 主方向长度增加了dx长度，即basePoint_world向主方向平移了dx长度
+        const pointPolar: PolarCoord = {
+            length: dx,
+            angle: -this.anticlockwiseAngle
+        };
+
+        const point = GraphicsAssist.polarToCartesian(pointPolar);
+
+        this.basePoint_world = new Point(deviceZoomOrigin.x + point.x, deviceZoomOrigin.y + point.y);
     }
 
     /**
@@ -88,12 +130,23 @@ export default class CoordTransform {
      * @param zoomScale 缩放比例
      */
     public zoomY = (deviceZoomOrigin: Point, zoomScale: number) => {
+        // 因为引入了角度，所以如果要改变x（主方向）和y（副方向）方向，需要将deviceZoomOrigin先恢复到angle为0的点
+        const newOrigin = GraphicsAssist.rotatePoint(this.basePoint_world, deviceZoomOrigin, -this.anticlockwiseAngle);
+
         this._worldToDevice_Len_Y = this._worldToDevice_Len_Y * 1 / zoomScale;
 
         // 更改基点位置
-        let dy = this.basePoint_world.y - deviceZoomOrigin.y;
+        let dy = this.basePoint_world.y - newOrigin.y;
         dy *= zoomScale;
-        this.basePoint_world = new Point(this.basePoint_world.x, deviceZoomOrigin.y + dy);
+
+        // 副方向长度增加了dy长度，即basePoint_world向副方向平移了dx长度
+        const pointPolar: PolarCoord = {
+            length: dy,
+            angle: -this.anticlockwiseAngle + Math.PI * 0.5
+        };
+        const point = GraphicsAssist.polarToCartesian(pointPolar);
+
+        this.basePoint_world = new Point(deviceZoomOrigin.x + point.x, deviceZoomOrigin.y + point.y);
     }
 
     public rotateAnticlockwise = (angle: number) => {

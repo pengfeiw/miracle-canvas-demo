@@ -476,6 +476,9 @@ export class EntityCollection extends Entity {
         this.ctf = new CoordTransform(1);
 
         this.rotateLocked = true;
+        this.xLocked = true;
+        this.yLocked = true;
+        this.diagLocked = true;
     }
     public draw(ctx: CanvasRenderingContext2D): void {
         for (let i = 0; i < this.entities.length; i++) {
