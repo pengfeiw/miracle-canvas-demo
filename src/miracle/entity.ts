@@ -14,8 +14,8 @@ abstract class Entity {
     public yLocked = false; // y方向缩放是否禁用
     public diagLocked = false; // 对角线缩放是否禁用
     public rotateLocked = false; // 旋转是否禁用
-    public controlStyle = ControlStyle.Rectangle; // 控制点样式
-    public controlSize = 8; // 控制点大小
+    public controlStyle = ControlStyle.Circle; // 控制点样式
+    public controlSize = 20; // 控制点大小
     public borderStyle = "#007acc"; // 选中时边框样式
     public borderWidth = 2; // 选中时边框线宽
     public rotateControlDistance = 40; // 旋转点距离包围框矩形的距离
