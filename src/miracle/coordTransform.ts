@@ -4,7 +4,7 @@ export default class CoordTransform {
     private _worldToDevice_Len_X: number; // x方向：这里叫x方向其实是不准确的，应该是主方向，在角度为0的时候为x方向。
     private _worldToDevice_Len_Y: number; // y方向：这里叫y方向其实是不准确的，应该是副方向，在角度为0的时候为y方向。
     private anticlockwiseAngle: number; // 逆时针旋转角度
-    private basePoint_world = new Point(0, 0); // 基点（世界坐标系）
+    private basePoint_world = new Point(0, 0); // 基点（世界坐标系）,也是该图块自身的旋转中心
 
     /**
      * 设置基点（图的旋转中心）
@@ -19,7 +19,7 @@ export default class CoordTransform {
     public constructor(scale: number = 1) {
         this._worldToDevice_Len_X = 1 / scale;
         this._worldToDevice_Len_Y = 1 / scale;
-        this.anticlockwiseAngle = Math.PI / 18;
+        this.anticlockwiseAngle = 0;
     }
     public get worldToDevice_Len_X() {
         return this._worldToDevice_Len_X;
@@ -38,17 +38,16 @@ export default class CoordTransform {
     public worldToDevice_Point = (pointW: Point) => {
         const dx = pointW.x * 1 / this._worldToDevice_Len_X;
         const dy = pointW.y * 1 / this._worldToDevice_Len_Y;
-        return new Point(this.basePoint_world.x + dx, this.basePoint_world.y + dy);
 
-        // // 处理旋转角度
-        // const pointNotRotate = new Point(dx, dy);
-        // const pointNotRotate_polar = GraphicsAssist.cartesianToPolar(pointNotRotate);
-        // const pointRotate_polar = {
-        //     length: pointNotRotate_polar.length,
-        //     angle: pointNotRotate_polar.angle + this.anticlockwiseAngle
-        // };
-        // const pointRotate = GraphicsAssist.polarToCartesian(pointRotate_polar);
-        // return new Point(this.basePoint_world.x + pointRotate.x, this.basePoint_world.y + pointRotate.y);
+        // 处理旋转角度
+        const pointNotRotate = new Point(dx, dy);
+        const pointNotRotate_polar = GraphicsAssist.cartesianToPolar(pointNotRotate);
+        const pointRotate_polar = {
+            length: pointNotRotate_polar.length,
+            angle: pointNotRotate_polar.angle + this.anticlockwiseAngle
+        };
+        const pointRotate = GraphicsAssist.polarToCartesian(pointRotate_polar);
+        return new Point(this.basePoint_world.x + pointRotate.x, this.basePoint_world.y + pointRotate.y);
     };
 
     /**

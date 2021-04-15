@@ -56,7 +56,7 @@ abstract class Entity {
     public getControlBound_lm_device(): Rectangle {
         const controlPointW = GraphicsAssist.mid(this.bound.lt, this.bound.ld);
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
-        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        return new Rectangle(controlPointD, this.controlSize, this.controlSize);
     }
 
     /**
@@ -65,7 +65,7 @@ abstract class Entity {
     public getControlBound_rm_device(): Rectangle {
         const controlPointW = GraphicsAssist.mid(this.bound.rt, this.bound.rd);
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
-        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        return new Rectangle(controlPointD, this.controlSize, this.controlSize);
     }
 
     /**
@@ -74,7 +74,7 @@ abstract class Entity {
     public getControlBound_tm_device(): Rectangle {
         const controlPointW = GraphicsAssist.mid(this.bound.lt, this.bound.rt);
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
-        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        return new Rectangle(controlPointD, this.controlSize, this.controlSize);
     }
 
     /**
@@ -83,7 +83,7 @@ abstract class Entity {
     public getControlBound_bm_device(): Rectangle {
         const controlPointW = GraphicsAssist.mid(this.bound.ld, this.bound.rd);
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
-        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        return new Rectangle(controlPointD, this.controlSize, this.controlSize);
     }
 
     /**
@@ -92,7 +92,7 @@ abstract class Entity {
     public getControlBound_lt_device(): Rectangle {
         const controlPointW = this.bound.lt;
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
-        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        return new Rectangle(controlPointD, this.controlSize, this.controlSize);
     }
 
     /**
@@ -101,7 +101,7 @@ abstract class Entity {
     public getControlBound_rt_device(): Rectangle {
         const controlPointW = this.bound.rt;
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
-        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        return new Rectangle(controlPointD, this.controlSize, this.controlSize);
     }
 
     /**
@@ -110,7 +110,7 @@ abstract class Entity {
     public getControlBound_lb_device(): Rectangle {
         const controlPointW = this.bound.ld;
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
-        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        return new Rectangle(controlPointD, this.controlSize, this.controlSize);
     }
 
     /**
@@ -119,7 +119,7 @@ abstract class Entity {
     public getControlBound_rb_device(): Rectangle {
         const controlPointW = this.bound.rd;
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
-        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        return new Rectangle(controlPointD, this.controlSize, this.controlSize);
     }
 
     /**
@@ -129,7 +129,7 @@ abstract class Entity {
         const tm = GraphicsAssist.mid(this.bound.lt, this.bound.rt);
         const controlPointW = new Point(tm.x, tm.y - this.rotateControlDistance);
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
-        return new Rectangle(new Point(controlPointD.x - this.controlSize * 0.5, controlPointD.y - this.controlSize * 0.5), this.controlSize, this.controlSize);
+        return new Rectangle(controlPointD, this.controlSize, this.controlSize);
     }
 
     /**
@@ -342,6 +342,9 @@ export class PolyShape extends Shape {
             points.push(this.ctf.worldToDevice_Point(vertex));
         })
 
+        // // 测试
+        // console.log("===========draw=============", points[0], points[1], points[2], points[3]);
+
         // 绘制
         if (this.filled) {
             ctx.beginPath();
@@ -437,7 +440,7 @@ export class Circle extends Shape {
      * 求包围框
      */
     public getBound(): Rectangle {
-        return new Rectangle(new Point(this.center.x - this.radiusX, this.center.y - this.radiusY), 2 * this.radiusX, 2 * this.radiusY);
+        return new Rectangle(this.center, 2 * this.radiusX, 2 * this.radiusY);
     }
     protected setRotateOrigin(originW: Point): void {
         const dx = this.center.x - originW.x;

@@ -47,6 +47,12 @@ export enum Operator {
      */
     ChangeEntitySizeMt
 }
+
+interface DynamicRect {
+    lt: Point;
+    rd: Point;
+}
+
 class MiracleMouseControl {
     private entities: Entity[]; // 所有entity
     private mouseHoveEntity?: Entity; // 鼠标未拖拽时，当前鼠标悬浮的Entity
@@ -55,7 +61,7 @@ class MiracleMouseControl {
     private dragging = false; // 是否正在拖拽
     private mouseDownPosition?: Point; // 鼠标点击位置
     private operator = Operator.BoxSelect; // 用户此时的操作类型
-    private dynamicRect?: Rectangle;
+    private dynamicRect?: DynamicRect;
 
     public constructor(entities: Entity[], canvas: HTMLCanvasElement) {
         this.entities = entities;
@@ -111,7 +117,7 @@ class MiracleMouseControl {
                 ctx.setLineDash([6]);
                 ctx.strokeStyle = "black";
                 ctx.beginPath();
-                ctx.strokeRect(dynaimcRect.location.x, dynaimcRect.location.y, dynaimcRect.width, dynaimcRect.height);
+                ctx.strokeRect(dynaimcRect.lt.x, dynaimcRect.lt.y, dynaimcRect.rd.x - dynaimcRect.lt.x, dynaimcRect.rd.y - dynaimcRect.lt.y);
             }
         }
     }
@@ -121,9 +127,10 @@ class MiracleMouseControl {
      * 绘制动态框选框 
      */
     private drawSelectBox = (event: MouseEvent) => {
-        const w = event.offsetX - this.dynamicRect!.location.x;
-        const h = event.offsetY - this.dynamicRect!.location.y;
-        this.dynamicRect = new Rectangle(this.dynamicRect!.location, w, h);
+        this.dynamicRect = {
+            lt: this.dynamicRect!.lt,
+            rd: new Point(event.offsetX, event.offsetY)
+        }
         this.redraw();
     };
 
@@ -342,7 +349,7 @@ class MiracleMouseControl {
 
             if (this.activeCollection) {
                 const boundW = this.activeCollection.bound;
-                const boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.lt), 1 / this.activeCollection.ctf.worldToDevice_Len_X * boundW.width,
+                const boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.location), 1 / this.activeCollection.ctf.worldToDevice_Len_X * boundW.width,
                     1 / this.activeCollection.ctf.worldToDevice_Len_Y * boundW.height);
                 if (GraphicsAssist.isPointInRectangle(mousePoint, boundD)) {
                     document.body.style.cursor = "move";
@@ -354,8 +361,18 @@ class MiracleMouseControl {
             for (let i = 0; i < this.entities.length; i++) {
                 const ent = this.entities[i];
                 const boundW = ent.bound;
-                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.lt), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
+                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
                     1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
+                
+                
+                // 测试 ---绘制屏幕包围框
+                const ctx = this.canvas.getContext("2d");
+                if (ctx) {
+                    ctx.strokeStyle = "gray";
+                    ctx.beginPath();
+                    ctx.strokeRect(boundD.lt.x, boundD.lt.y, boundD.width, boundD.height);
+                }
+
 
                 // 鼠标位于entity包围框内，鼠标指针为"move"
                 if (GraphicsAssist.isPointInRectangle(mousePoint, boundD)) {
@@ -400,7 +417,11 @@ class MiracleMouseControl {
                 }
             }
             if (this.operator === Operator.BoxSelect) {
-                this.dynamicRect = new Rectangle(this.mouseDownPosition, 0, 0);
+                // this.dynamicRect = new Rectangle(this.mouseDownPosition, 0, 0);
+                this.dynamicRect = {
+                    lt: this.mouseDownPosition,
+                    rd: this.mouseDownPosition
+                };
                 this.entities.forEach((ent) => {
                     ent.isActive = false;
                 });
@@ -458,7 +479,9 @@ class MiracleMouseControl {
                 const boundW = ent.bound;
                 const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
                     1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
-                if (Rectangle.intersection([this.dynamicRect, boundD])) {
+                const mouseRect = new Rectangle(GraphicsAssist.mid(this.dynamicRect.lt, this.dynamicRect.rd), this.dynamicRect.rd.x - this.dynamicRect.lt.x, 
+                    this.dynamicRect.rd.y - this.dynamicRect.lt.y);
+                if (Rectangle.intersection(mouseRect, boundD)) {
                     ent.isActive = true;
                 }
             }

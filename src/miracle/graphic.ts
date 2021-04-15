@@ -57,7 +57,8 @@ export class Vector {
  * 矩形区域，高和宽可以为负数
  */
 export class Rectangle {
-    public location: Point; // 左上角坐标
+    public location: Point; // 矩形中点
+    public angle: number; // 按照中心点的旋转角度
     private _width: number; // 宽度
     private _height: number; // 高度
 
@@ -73,28 +74,32 @@ export class Rectangle {
      * 左上角点
      */
     public get lt() {
-        return this.location;
+        const lt_normal  = new Point(this.location.x - this.width * 0.5, this.location.y - this.height * 0.5);
+        return GraphicsAssist.rotatePoint(this.location, lt_normal, this.angle);
     }
 
     /**
      * 左下角点
      */
     public get ld() {
-        return new Point(this.location.x, this.location.y + this.height);
+        const ld_normal = new Point(this.location.x - this.width * 0.5, this.location.y + this.height * 0.5);
+        return GraphicsAssist.rotatePoint(this.location, ld_normal, this.angle);
     }
 
     /**
      * 右上角点
      */
     public get rt() {
-        return new Point(this.location.x + this.width, this.location.y);
+        const rt_normal = new Point(this.location.x + this.width * 0.5, this.location.y - this.height * 0.5);
+        return GraphicsAssist.rotatePoint(this.location, rt_normal, this.angle);
     }
 
     /**
      * 右下角点
      */
     public get rd() {
-        return new Point(this.location.x + this.width, this.location.y + this.height);
+        const rd_normal = new Point(this.location.x + this.width * 0.5, this.location.y + this.height * 0.5);
+        return GraphicsAssist.rotatePoint(this.location, rd_normal, this.angle);
     }
 
     /**
@@ -104,6 +109,7 @@ export class Rectangle {
      */
     public constructor(location: Point, w: number, h: number) {
         this.location = location;
+        this.angle = 0;
         this._width = w;
         this._height = h;
     }
@@ -129,7 +135,7 @@ export class Rectangle {
         const lt = new Point(min_x, min_y);
         const w = max_x - min_x;
         const h = max_y - min_y;
-        return new Rectangle(lt, w, h);
+        return new Rectangle(new Point(lt.x + w * 0.5, lt.y + h * 0.5), w, h);
     }
 
     /**
@@ -149,83 +155,17 @@ export class Rectangle {
 
         return Rectangle.bound(points);
     }
-
     /**
-     * 求一组矩形的交集，如果没有交集返回null
-     * @param rects 一组矩形
+     * 判断两个矩形是否相交
      */
-    public static intersection(rects: Rectangle[]) {
-        if (rects.length < 2) {
-            throw new Error("Rectangle的个数不能小于2");
-        }
+    public static intersection(rect1: Rectangle, rect2: Rectangle) {
+        const isLtInRect = GraphicsAssist.isPointInRectangle(rect1.lt, rect2);
+        const isLdInRect = GraphicsAssist.isPointInRectangle(rect1.ld, rect2);
+        const isRdInRect = GraphicsAssist.isPointInRectangle(rect1.rd, rect2);
+        const isRtInRect = GraphicsAssist.isPointInRectangle(rect1.rt, rect2);
 
-        const newRects = [];
-        // 处理矩形尺寸为负数的情况
-        for (let i = 0; i < rects.length; i++) {
-            const newLocation = new Point(rects[i].location.x, rects[i].location.y);
-            if (rects[i].width < 0) {
-                newLocation.x = newLocation.x + rects[i].width;
-            }
-            if (rects[i].height < 0) {
-                newLocation.y = newLocation.y + rects[i].height;
-            }
-            newRects.push(new Rectangle(newLocation, Math.abs(rects[i].width), Math.abs(rects[i].height)));
-        }
-
-        // 判断两个矩形是否相交，如果相交返回相交后的矩形，否则返回null
-        const intersection2 = (rect1: Rectangle, rect2: Rectangle) => {
-            let lx, rx, ty, dy;
-            const isIntersection = rect2.lt.y < rect1.ld.y && rect2.ld.y > rect1.lt.y && rect2.rt.x > rect1.lt.x && rect2.lt.x < rect1.rt.x;
-            if (isIntersection) {
-                const min_x1 = rect1.lt.x;
-                const max_x1 = rect1.rt.x;
-                const min_y1 = rect1.lt.y;
-                const max_y1 = rect1.ld.y;
-
-                const min_x2 = rect2.lt.x;
-                const max_x2 = rect2.rt.x;
-                const min_y2 = rect2.lt.y;
-                const max_y2 = rect2.ld.y;
-
-                // 确定x
-                if (max_x2 < max_x1) {
-                    rx = max_x2;
-                } else {
-                    rx = max_x1;
-                }
-                if (min_x2 < min_x1) {
-                    lx = min_x1;
-                } else {
-                    lx = min_x2;
-                }
-
-                // 确定y
-                if (min_y2 < min_y1) {
-                    ty = min_y1;
-                } else {
-                    ty = min_y2;
-                }
-                if (max_y2 > max_y1) {
-                    dy = max_y1;
-                } else {
-                    dy = max_y2;
-                }
-
-                return new Rectangle(new Point(lx, ty), rx - lx, dy - ty);
-            }
-            return null;
-        }
-
-        let intersectRect: Rectangle | null = newRects[0];
-        for (let i = 1; i < newRects.length; i++) {
-            if (!intersectRect) {
-                return null;
-            }
-            intersectRect = intersection2(intersectRect, newRects[i]);
-        }
-
-        return intersectRect;
-    }
+        return isLtInRect || isLdInRect || isRdInRect || isRtInRect;
+    };
 }
 
 export namespace GraphicsAssist {
@@ -299,5 +239,25 @@ export namespace GraphicsAssist {
         const y = Math.sin(point.angle) * point.length;
 
         return new Point(x, y);
+    }
+
+    /**
+     * 将一个点，绕着另一个点旋转一定的角度
+     * @param origin 旋转中心
+     * @param point 旋转点
+     * @param anticlockwiseAngle 旋转角度
+     */
+    export const rotatePoint = (origin: Point, point: Point, anticlockwiseAngle: number) => {
+        const p1 = new Point(point.x - origin.x, point.y - origin.y);
+        
+        const p1_polar = cartesianToPolar(p1);
+        const p1_polar_rotate: PolarCoord = {
+            length: p1_polar.length,
+            angle: p1_polar.angle + anticlockwiseAngle
+        };
+
+        const p1_rotate = polarToCartesian(p1_polar_rotate);
+
+        return new Point(p1_rotate.x + origin.x, p1_rotate.y + origin.y);
     }
 }
