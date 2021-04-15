@@ -3,7 +3,7 @@ import {GraphicsAssist, Point, Vector} from "./graphic";
 export default class CoordTransform {
     private _worldToDevice_Len_X: number; // x方向：这里叫x方向其实是不准确的，应该是主方向，在角度为0的时候为x方向。
     private _worldToDevice_Len_Y: number; // y方向：这里叫y方向其实是不准确的，应该是副方向，在角度为0的时候为y方向。
-    private anticlockwiseAngle: number; // 逆时针旋转角度
+    public anticlockwiseAngle: number; // 逆时针旋转角度
     private basePoint_world = new Point(0, 0); // 基点（世界坐标系）,也是该图块自身的旋转中心
 
     /**
@@ -44,7 +44,7 @@ export default class CoordTransform {
         const pointNotRotate_polar = GraphicsAssist.cartesianToPolar(pointNotRotate);
         const pointRotate_polar = {
             length: pointNotRotate_polar.length,
-            angle: pointNotRotate_polar.angle + this.anticlockwiseAngle
+            angle: pointNotRotate_polar.angle - this.anticlockwiseAngle // 因为屏幕坐标Y值向下，所以角度用减法表示逆时针旋转
         };
         const pointRotate = GraphicsAssist.polarToCartesian(pointRotate_polar);
         return new Point(this.basePoint_world.x + pointRotate.x, this.basePoint_world.y + pointRotate.y);

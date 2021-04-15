@@ -39,9 +39,7 @@ const App = () => {
             triangle.filled = true;
             triangle.closed = true;
             triangle.fillStyle = "gray";
-            // miracle.addEntity(rect, circle, triangle);
-            // miracle.addEntity(circle);
-            miracle.addEntity(rect);
+            miracle.addEntity(circle, rect, triangle);
         }
     }, [miracle]);
     return (

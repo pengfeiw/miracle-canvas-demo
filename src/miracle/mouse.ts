@@ -360,19 +360,20 @@ class MiracleMouseControl {
 
             for (let i = 0; i < this.entities.length; i++) {
                 const ent = this.entities[i];
-                const boundW = ent.bound;
-                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
-                    1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
+                const boundD = ent.boundD;
                 
-                
-                // 测试 ---绘制屏幕包围框
-                const ctx = this.canvas.getContext("2d");
-                if (ctx) {
-                    ctx.strokeStyle = "gray";
-                    ctx.beginPath();
-                    ctx.strokeRect(boundD.lt.x, boundD.lt.y, boundD.width, boundD.height);
-                }
-
+                // // 测试 ---绘制屏幕包围框
+                // const ctx = this.canvas.getContext("2d");
+                // if (ctx) {
+                //     ctx.strokeStyle = "gray";
+                //     ctx.beginPath();
+                //     ctx.moveTo(boundD.lt.x, boundD.lt.y);
+                //     ctx.lineTo(boundD.ld.x, boundD.ld.y);
+                //     ctx.lineTo(boundD.rd.x, boundD.rd.y);
+                //     ctx.lineTo(boundD.rt.x, boundD.rt.y);
+                //     ctx.closePath();
+                //     ctx.stroke();
+                // }
 
                 // 鼠标位于entity包围框内，鼠标指针为"move"
                 if (GraphicsAssist.isPointInRectangle(mousePoint, boundD)) {
@@ -476,9 +477,7 @@ class MiracleMouseControl {
         if (this.operator === Operator.BoxSelect && this.dynamicRect) {
             for (let i = 0; i < this.entities.length; i++) {
                 const ent = this.entities[i];
-                const boundW = ent.bound;
-                const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
-                    1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
+                const boundD = ent.boundD;
                 const mouseRect = new Rectangle(GraphicsAssist.mid(this.dynamicRect.lt, this.dynamicRect.rd), this.dynamicRect.rd.x - this.dynamicRect.lt.x, 
                     this.dynamicRect.rd.y - this.dynamicRect.lt.y);
                 if (Rectangle.intersection(mouseRect, boundD)) {

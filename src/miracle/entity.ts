@@ -51,6 +51,20 @@ abstract class Entity {
     }
 
     /**
+     * 包围框（屏幕坐标系）
+     */
+    public get boundD(): Rectangle {
+        const boundW = this.getBound();
+        const locationW = GraphicsAssist.mid(boundW.lt, boundW.rd);
+        const locationD = this.ctf.worldToDevice_Point(locationW);
+        const widthD = boundW.width * 1 / this.ctf.worldToDevice_Len_X;
+        const heightD = boundW.height * 1 / this.ctf.worldToDevice_Len_Y;
+        const boundD = new Rectangle(locationD, widthD, heightD);
+        boundD.angle = this.ctf.anticlockwiseAngle;
+        return boundD;
+    }
+
+    /**
      * 获得left middle控制点包围框（设备坐标系）
      */
     public getControlBound_lm_device(): Rectangle {
@@ -342,9 +356,6 @@ export class PolyShape extends Shape {
             points.push(this.ctf.worldToDevice_Point(vertex));
         })
 
-        // // 测试
-        // console.log("===========draw=============", points[0], points[1], points[2], points[3]);
-
         // 绘制
         if (this.filled) {
             ctx.beginPath();
@@ -420,8 +431,12 @@ export class Circle extends Shape {
         const r1 = 1 / this.ctf.worldToDevice_Len_X * this.radiusX;
         const r2 = 1 / this.ctf.worldToDevice_Len_Y * this.radiusY;
 
+        ctx.translate(o.x, o.y);
+        ctx.rotate(-this.ctf.anticlockwiseAngle);
         ctx.beginPath();
-        ctx.ellipse(o.x, o.y, r1, r2, 0, 0, 2 * Math.PI);
+        ctx.ellipse(0, 0, r1, r2, 0, 0, 2 * Math.PI);
+        ctx.resetTransform();
+
         if (this.filled) {
             ctx.fill();
         } else {
@@ -459,6 +474,8 @@ export class EntityCollection extends Entity {
         super(new Point(0, 0));
         this.entities = entities;
         this.ctf = new CoordTransform(1);
+
+        this.rotateLocked = true;
     }
     public draw(ctx: CanvasRenderingContext2D): void {
         for (let i = 0; i < this.entities.length; i++) {
@@ -473,13 +490,7 @@ export class EntityCollection extends Entity {
         }
     }
     protected getBound(): Rectangle {
-        const boundsD = this.entities.map((ent) => {
-            const boundW = ent.bound;
-            const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
-                1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
-            return boundD;
-        });
-
+        const boundsD = this.entities.map((ent) => ent.boundD);
         return Rectangle.union(boundsD);
     }
     protected setRotateOrigin(originW: Point): void {

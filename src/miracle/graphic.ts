@@ -150,7 +150,7 @@ export class Rectangle {
         const points: Point[] = [];
 
         for (let i = 0; i < rects.length; i++) {
-            points.push(rects[i].lt, rects[i].rd);
+            points.push(rects[i].lt, rects[i].ld, rects[i].rt, rects[i].rd);
         }
 
         return Rectangle.bound(points);
@@ -159,12 +159,20 @@ export class Rectangle {
      * 判断两个矩形是否相交
      */
     public static intersection(rect1: Rectangle, rect2: Rectangle) {
+        if (rect1.height === 0 || rect1.width === 0 || rect2.height === 0 || rect1.width ===0) {
+            // 非矩形的情况
+            return false;
+        }
         const isLtInRect = GraphicsAssist.isPointInRectangle(rect1.lt, rect2);
         const isLdInRect = GraphicsAssist.isPointInRectangle(rect1.ld, rect2);
         const isRdInRect = GraphicsAssist.isPointInRectangle(rect1.rd, rect2);
         const isRtInRect = GraphicsAssist.isPointInRectangle(rect1.rt, rect2);
 
-        return isLtInRect || isLdInRect || isRdInRect || isRtInRect;
+        const isLtInRect2 = GraphicsAssist.isPointInRectangle(rect2.lt, rect1);
+        const isLdInRect2 = GraphicsAssist.isPointInRectangle(rect2.ld, rect1);
+        const isRdInRect2 = GraphicsAssist.isPointInRectangle(rect2.rd, rect1);
+        const isRtInRect2 = GraphicsAssist.isPointInRectangle(rect2.rt, rect1);
+        return isLtInRect || isLdInRect || isRdInRect || isRtInRect || isLtInRect2 || isLdInRect2 || isRdInRect2 || isRtInRect2;
     };
 }
 
@@ -253,7 +261,7 @@ export namespace GraphicsAssist {
         const p1_polar = cartesianToPolar(p1);
         const p1_polar_rotate: PolarCoord = {
             length: p1_polar.length,
-            angle: p1_polar.angle + anticlockwiseAngle
+            angle: p1_polar.angle - anticlockwiseAngle // 因为屏幕坐标系Y轴向上，所以这里用减法
         };
 
         const p1_rotate = polarToCartesian(p1_polar_rotate);
