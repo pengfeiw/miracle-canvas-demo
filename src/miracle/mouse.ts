@@ -239,7 +239,19 @@ class MiracleMouseControl {
         const activeEntities = this.getActiveEntities();
         if (activeEntities.length > 0) {
             for (let i = 0; i < activeEntities.length; i++) {
-                activeEntities[i].rotateAnticlockwise(Math.PI / 18);
+                const boundD = activeEntities[i].boundD;
+                const rotateOrigin = boundD.location;
+                const rotateControlBoundD = activeEntities[i].getControlBound_rotate_device();
+                const point1 = rotateControlBoundD.location;
+                const point11 = new Point(point1.x - rotateOrigin.x, point1.y - rotateOrigin.y);
+                const point11Polar = GraphicsAssist.cartesianToPolar(point11);
+
+                const point2 = new Point(event.offsetX, event.offsetY);
+                const point22 = new Point(point2.x - rotateOrigin.x, point2.y - rotateOrigin.y);
+                const point22Polar = GraphicsAssist.cartesianToPolar(point22);
+
+                const rotateAngle = point22Polar.angle - point11Polar.angle;
+                activeEntities[i].rotateAnticlockwise(-rotateAngle);
             }
         }
         this.redraw();
@@ -346,7 +358,7 @@ class MiracleMouseControl {
 
                 if (!entity.rotateLocked) {
                     // 旋转点
-                    const rotateCtrBoundD = entity.getControlBound_rotate();
+                    const rotateCtrBoundD = entity.getControlBound_rotate_device();
                     if (isMouseInControlBound(rotateCtrBoundD)) {
                         document.body.style.cursor = "crosshair";
                         this.operator = Operator.RotateEntity;

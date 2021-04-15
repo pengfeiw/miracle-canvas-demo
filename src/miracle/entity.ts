@@ -137,9 +137,9 @@ abstract class Entity {
     }
 
     /**
-     * 获得旋转控制点包围框（世界坐标系）
+     * 获得旋转控制点包围框（设备坐标系）
      */
-    public getControlBound_rotate(): Rectangle {
+    public getControlBound_rotate_device(): Rectangle {
         const tm = GraphicsAssist.mid(this.bound.lt, this.bound.rt);
         const controlPointW = new Point(tm.x, tm.y - this.rotateControlDistance);
         const controlPointD = this.ctf.worldToDevice_Point(controlPointW);
