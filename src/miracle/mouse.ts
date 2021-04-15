@@ -226,6 +226,16 @@ class MiracleMouseControl {
             this.redraw();
         }
     };
+
+    private rotateEntity = (event: MouseEvent) => {
+        const activeEntities = this.getActiveEntities();
+        if (activeEntities.length > 0) {
+            for (let i = 0; i <activeEntities.length; i++) {
+                activeEntities[i].rotateAnticlockwise(Math.PI / 18);
+            }
+        }
+        this.redraw();
+    }
     //#endregion
 
     //#region 鼠标操作
@@ -431,6 +441,9 @@ class MiracleMouseControl {
                     break;
                 case Operator.ChangeEntitySizeMt:
                     this.resizeEntity(event);
+                    break;
+                case Operator.RotateEntity:
+                    this.rotateEntity(event);
                     break;
                 default:
                     break;

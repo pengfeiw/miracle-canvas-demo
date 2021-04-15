@@ -1,3 +1,11 @@
+/**
+ * 极坐标
+ */
+interface PolarCoord {
+    angle: number; // 角度
+    length: number; // 模长
+}
+
 export class Point {
     public x: number;
     public y: number;
@@ -232,7 +240,6 @@ export namespace GraphicsAssist {
      * 判断点是否处于一个矩形中
      */
     export const isPointInRectangle = (point: Point, rect: Rectangle) => {
-
         const vectLtp = rect.lt.getVectorTo(point);
         const vectRtp = rect.rt.getVectorTo(point);
         const vectLdp = rect.ld.getVectorTo(point);
@@ -273,5 +280,24 @@ export namespace GraphicsAssist {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 笛卡尔坐标转极坐标
+     */
+    export const cartesianToPolar = (point: Point): PolarCoord => {
+        const length = Math.sqrt(point.x * point.x + point.y * point.y);
+        const angle = Math.atan2(point.y, point.x);
+        return {length, angle};
+    }
+
+    /**
+     * 极坐标转笛卡尔
+     */
+    export const polarToCartesian = (point: PolarCoord): Point => {
+        const x = Math.cos(point.angle) * point.length;
+        const y = Math.sin(point.angle) * point.length;
+
+        return new Point(x, y);
     }
 }

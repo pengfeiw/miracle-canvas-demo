@@ -1,9 +1,9 @@
-import {Point, Vector} from "./graphic";
+import {GraphicsAssist, Point, Vector} from "./graphic";
 
 export default class CoordTransform {
     private _worldToDevice_Len_X: number; // x方向：这里叫x方向其实是不准确的，应该是主方向，在角度为0的时候为x方向。
     private _worldToDevice_Len_Y: number; // y方向：这里叫y方向其实是不准确的，应该是副方向，在角度为0的时候为y方向。
-    private angle: number; // 旋转角度
+    private anticlockwiseAngle: number; // 逆时针旋转角度
     private basePoint_world = new Point(0, 0); // 基点（世界坐标系）
 
     /**
@@ -19,7 +19,7 @@ export default class CoordTransform {
     public constructor(scale: number = 1) {
         this._worldToDevice_Len_X = 1 / scale;
         this._worldToDevice_Len_Y = 1 / scale;
-        this.angle = 0;
+        this.anticlockwiseAngle = Math.PI / 18;
     }
     public get worldToDevice_Len_X() {
         return this._worldToDevice_Len_X;
@@ -30,6 +30,7 @@ export default class CoordTransform {
     public displacement = (vector: Vector) => {
         this.basePoint_world = new Point(this.basePoint_world.x + vector.x, this.basePoint_world.y + vector.y);
     };
+
     /**
      * 将世界坐标系点转换为设备坐标点
      * @param pointW 
@@ -37,8 +38,17 @@ export default class CoordTransform {
     public worldToDevice_Point = (pointW: Point) => {
         const dx = pointW.x * 1 / this._worldToDevice_Len_X;
         const dy = pointW.y * 1 / this._worldToDevice_Len_Y;
-
         return new Point(this.basePoint_world.x + dx, this.basePoint_world.y + dy);
+
+        // // 处理旋转角度
+        // const pointNotRotate = new Point(dx, dy);
+        // const pointNotRotate_polar = GraphicsAssist.cartesianToPolar(pointNotRotate);
+        // const pointRotate_polar = {
+        //     length: pointNotRotate_polar.length,
+        //     angle: pointNotRotate_polar.angle + this.anticlockwiseAngle
+        // };
+        // const pointRotate = GraphicsAssist.polarToCartesian(pointRotate_polar);
+        // return new Point(this.basePoint_world.x + pointRotate.x, this.basePoint_world.y + pointRotate.y);
     };
 
     /**
@@ -86,4 +96,9 @@ export default class CoordTransform {
         dy *= zoomScale;
         this.basePoint_world = new Point(this.basePoint_world.x, deviceZoomOrigin.y + dy);
     }
+
+    public rotateAnticlockwise = (angle: number) => {
+        this.anticlockwiseAngle += angle;
+        this.anticlockwiseAngle %= 2 * Math.PI;
+    };
 }

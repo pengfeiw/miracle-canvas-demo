@@ -263,8 +263,8 @@ abstract class Entity {
      * @param originInDevice 旋转中心
      * @param angle 旋转角度（弧度值）
      */
-    public rotateClockwise(originInDevice: Point, angle: number) {
-        
+    public rotateAnticlockwise(angle: number) {
+        this.ctf.rotateAnticlockwise(angle);
     }
 }
 
