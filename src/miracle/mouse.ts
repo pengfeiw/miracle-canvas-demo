@@ -412,12 +412,7 @@ class MiracleMouseControl {
             this.mouseDownPosition = new Point(event.offsetX, event.offsetY);
             if (this.operator === Operator.MoveEntity) {
                 if (this.getActiveEntities().length > 0) {
-                    const boundsD = this.getActiveEntities().map((ent) => {
-                        const boundW = ent.bound;
-                        const boundD = new Rectangle(ent.ctf.worldToDevice_Point(boundW.location), 1 / ent.ctf.worldToDevice_Len_X * boundW.width,
-                            1 / ent.ctf.worldToDevice_Len_Y * boundW.height);
-                        return boundD;
-                    });
+                    const boundsD = this.getActiveEntities().map((ent) =>ent.boundD);
 
                     const unionBoundD = Rectangle.union(boundsD);
 
