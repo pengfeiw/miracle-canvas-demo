@@ -55,6 +55,12 @@ interface DynamicRect {
 
 class MiracleMouseControl {
     private entities: Entity[]; // 所有entity
+    /**
+     * 可见的Entity
+     */
+    private get visibleEntities() {
+        return this.entities.filter(ent => ent.visible);
+    } 
     private mouseHoveEntity?: Entity; // 鼠标未拖拽时，当前鼠标悬浮的Entity
     private activeCollection?: EntityCollection; // 当激活的entity个数大于1时，activeCollection不是undefined
     private canvas: HTMLCanvasElement; // entity所在的画布
@@ -79,15 +85,14 @@ class MiracleMouseControl {
     private redraw() {
         const ctx = this.canvas.getContext("2d");
         if (ctx) {
-
             // 绘制动态矩形
             ctx.clearRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
             ctx.setLineDash([]);
 
             // 绘制entity
-            this.entities.forEach((ent) => {
+            this.visibleEntities.forEach((ent) => {
                 ent.isDrawControlPoint = true;
-            })
+            });
             const activeEntities = this.getActiveEntities();
             if (activeEntities.length > 1) {
                 const collection = new EntityCollection(activeEntities);
@@ -97,16 +102,16 @@ class MiracleMouseControl {
                     ent.isDrawControlPoint = false;
                 })
 
-                for (let i = 0; i < this.entities.length; i++) {
-                    const entity = this.entities[i];
+                for (let i = 0; i < this.visibleEntities.length; i++) {
+                    const entity = this.visibleEntities[i];
                     if (!activeEntities.includes(entity)) {
                         entity.draw(ctx);
                     }
                 }
                 collection.draw(ctx);
             } else {
-                for (let i = 0; i < this.entities.length; i++) {
-                    const entity = this.entities[i];
+                for (let i = 0; i < this.visibleEntities.length; i++) {
+                    const entity = this.visibleEntities[i];
                     entity.draw(ctx);
                 }
             }
@@ -378,8 +383,8 @@ class MiracleMouseControl {
                 }
             }
 
-            for (let i = 0; i < this.entities.length; i++) {
-                const ent = this.entities[i];
+            for (let i = 0; i < this.visibleEntities.length; i++) {
+                const ent = this.visibleEntities[i];
                 const boundD = ent.boundD;
 
                 // // 测试 ---绘制屏幕包围框
@@ -417,7 +422,7 @@ class MiracleMouseControl {
                     const unionBoundD = Rectangle.union(boundsD);
 
                     if (!GraphicsAssist.isPointInRectangle(this.mouseDownPosition, unionBoundD)) {
-                        this.entities.forEach((ent) => {
+                        this.visibleEntities.forEach((ent) => {
                             ent.isActive = false;
                         })
 
@@ -438,7 +443,7 @@ class MiracleMouseControl {
                     lt: this.mouseDownPosition,
                     rd: this.mouseDownPosition
                 };
-                this.entities.forEach((ent) => {
+                this.visibleEntities.forEach((ent) => {
                     ent.isActive = false;
                 });
             }
@@ -490,8 +495,8 @@ class MiracleMouseControl {
 
     private onMouseUp = (event: MouseEvent) => {
         if (this.operator === Operator.BoxSelect && this.dynamicRect) {
-            for (let i = 0; i < this.entities.length; i++) {
-                const ent = this.entities[i];
+            for (let i = 0; i < this.visibleEntities.length; i++) {
+                const ent = this.visibleEntities[i];
                 const boundD = ent.boundD;
                 const mouseRect = new Rectangle(GraphicsAssist.mid(this.dynamicRect.lt, this.dynamicRect.rd), this.dynamicRect.rd.x - this.dynamicRect.lt.x,
                     this.dynamicRect.rd.y - this.dynamicRect.lt.y);
@@ -515,7 +520,7 @@ class MiracleMouseControl {
     //#endregion
 
     public getActiveEntities() {
-        return this.entities.filter((ent) => ent.isActive);
+        return this.visibleEntities.filter((ent) => ent.isActive);
     }
 }
 

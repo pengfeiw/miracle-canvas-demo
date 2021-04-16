@@ -53,9 +53,11 @@ class Miracle {
         }
     }
 
-    public drawAll() {
+
+    public redraw() {
         const ctx = this.up_canvas?.getContext("2d");
         if (ctx) {
+            ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
             for (let i = 0; i < this.entities.length; i++) {
                 this.entities[i].draw(ctx);
             }

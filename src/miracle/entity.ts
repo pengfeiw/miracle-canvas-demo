@@ -8,6 +8,7 @@ enum ControlStyle {
 
 abstract class Entity {
     public isActive = false; // 是否处于激活状态
+    public visible = true; // 是否可见
     public isDrawControlPoint = true; // 是否绘制控制点
     public ctf: CoordTransform; // 坐标转换
     public xLocked = false; // x方向缩放是否禁用
@@ -28,11 +29,13 @@ abstract class Entity {
     }
 
     public draw(ctx: CanvasRenderingContext2D) {
-        this.drawContent(ctx);
-        if (this.isActive) {
-            this.drawBound(ctx);
-            if (this.isDrawControlPoint) {
-                this.drawControlPoint(ctx);
+        if (this.visible) {
+            this.drawContent(ctx);
+            if (this.isActive) {
+                this.drawBound(ctx);
+                if (this.isDrawControlPoint) {
+                    this.drawControlPoint(ctx);
+                }
             }
         }
     }
