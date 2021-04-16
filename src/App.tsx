@@ -7,16 +7,24 @@ import {Point} from "./miracle/graphic";
 const App = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [miracle, setMiracle] = useState<Miracle>();
-    const [imgVisible, setImageVisible] = useState(true);
-    const [circleVisible, setCircleVisible] = useState(true);
-    const [rectVisible, setRectVisible] = useState(true);
-    const [triangleVisible, setTriangleVisible] = useState(true);
 
     // entity
     const [rect, setRect] = useState<PolyShape>();
     const [triangle, setTriangle] = useState<PolyShape>();
     const [circle, setCircle] = useState<Circle>();
     const [img, setImage] = useState<Image>();
+
+    // 图形可见
+    const [imgVisible, setImageVisible] = useState(true);
+    const [circleVisible, setCircleVisible] = useState(true);
+    const [rectVisible, setRectVisible] = useState(true);
+    const [triangleVisible, setTriangleVisible] = useState(true);
+
+    // 控制点
+    const [xctrShow, setXctrShow] = useState(true);
+    const [yctrShow, setYctrShow] = useState(true);
+    const [diagctrShow, setDiagctrShow] = useState(true);
+    const [rotatectrShow, setRotatectrShow] = useState(true);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -45,6 +53,15 @@ const App = () => {
         }
         miracle?.redraw();
     }, [imgVisible, circleVisible, rectVisible, triangleVisible, rect, triangle, img, circle, miracle]);
+
+    useEffect(() => {
+        if (miracle) {
+            miracle.xLocked = !xctrShow;
+            miracle.yLocked = !yctrShow;
+            miracle.diagLocked = !diagctrShow;
+            miracle.rotateLocked = !rotatectrShow;
+        }
+    }, [diagctrShow, miracle, rotatectrShow, xctrShow, yctrShow]);
 
     useEffect(() => {
         if (miracle) {
@@ -92,6 +109,12 @@ const App = () => {
                 <input id="triangle-checkbox" type="checkbox" onClick={() => {setTriangleVisible(visible => !visible)}} checked={triangleVisible} /><label htmlFor="triangle-checkbox">三角形</label>
                 <input id="circle-checkbox" type="checkbox" onClick={() => {setCircleVisible(visible => !visible)}} checked={circleVisible} /><label htmlFor="circle-checkbox">圆形</label>
                 <input id="image-checkbox" type="checkbox" onClick={() => {setImageVisible(visible => !visible)}} checked={imgVisible} /><label htmlFor="image-checkbox">图片</label>
+            </div>
+            <div>
+                <input type="checkbox" onClick={() => {setXctrShow(show => !show)}} checked={xctrShow} /><label>X控制</label>
+                <input type="checkbox" onClick={() => {setYctrShow(show => !show)}} checked={yctrShow} /><label>Y控制</label>
+                <input type="checkbox" onClick={() => {setDiagctrShow(show => !show)}} checked={diagctrShow} /><label>对角线控制</label>
+                <input type="checkbox" onClick={() => {setRotatectrShow(show => !show)}} checked={rotatectrShow} /><label>旋转控制</label>
             </div>
         </>
     );

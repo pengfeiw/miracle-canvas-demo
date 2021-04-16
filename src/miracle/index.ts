@@ -5,6 +5,31 @@ class Miracle {
     private low_canvas: HTMLCanvasElement;
     private up_canvas: HTMLCanvasElement | null;
     public entities: Entity[];
+    /**
+     * x方向缩放是否禁用
+     */
+    public set xLocked(value: boolean) {
+        this.entities.forEach((ent) => ent.xLocked = value);
+    }
+    /**
+     * y方向缩放是否禁用
+     */
+    public set yLocked(value: boolean) {
+        this.entities.forEach((ent) => ent.yLocked = value);
+    }
+    /**
+     * 对角线缩放是否禁用
+     */
+    public set diagLocked(value: boolean) {
+        this.entities.forEach((ent) => ent.diagLocked = value);
+    }
+    /**
+     *  旋转是否禁用
+     */
+    public set rotateLocked(value: boolean){
+        this.entities.forEach((ent) => ent.rotateLocked = value);
+    }
+
     private mouseControl?: MiracleMouseControl;
     constructor(canvas: HTMLCanvasElement, entities = []) {
         this.entities = entities;
@@ -42,6 +67,9 @@ class Miracle {
         }
     }
 
+    /**
+     * 添加entity
+     */
     public addEntity(...entities: Entity[]) {
         this.entities.push(...entities);
 
@@ -52,7 +80,10 @@ class Miracle {
             }
         }
     }
-
+    
+    /**
+     * 重绘
+     */
     public redraw() {
         const ctx = this.up_canvas?.getContext("2d");
         if (ctx) {
@@ -64,10 +95,23 @@ class Miracle {
     }
 
     /**
-     * 给up_canvas添加事件
+     * 获得当前激活的、可见的entity
      */
-    private initCanvas() {
+    public getActiveEntities() {
+        return this.entities.filter((ent) => ent.visible && ent.isActive);
+    }
 
+    /**
+     * 删除一个entity
+     */
+    public removeEntity(entity: Entity) {
+        const index = this.entities.indexOf(entity);
+        if (index > -1) {
+            this.entities.splice(index, 1);
+            this.redraw();
+        } else {
+            throw new Error("要删除的entity，不存在。")
+        }
     }
 }
 

@@ -158,10 +158,10 @@ class MiracleMouseControl {
         if (activeEntities.length > 0) {
             let boundD: Rectangle;
             if (this.activeCollection) {
-                boundD = this.activeCollection.boundD;
+                boundD = this.activeCollection.bound;
             } else {
                 const entity = activeEntities[0];
-                boundD = entity.boundD;
+                boundD = entity.bound;
             }
 
             if (this.operator === Operator.ChangeEntitySizeLt) {
@@ -239,7 +239,7 @@ class MiracleMouseControl {
         const activeEntities = this.getActiveEntities();
         if (activeEntities.length > 0) {
             for (let i = 0; i < activeEntities.length; i++) {
-                const boundD = activeEntities[i].boundD;
+                const boundD = activeEntities[i].bound;
                 const rotateOrigin = boundD.location;
                 const rotateControlBoundD = activeEntities[i].getControlBound_rotate_device();
                 const point1 = rotateControlBoundD.location;
@@ -368,7 +368,7 @@ class MiracleMouseControl {
             }
 
             if (this.activeCollection) {
-                const boundD = this.activeCollection.boundD;
+                const boundD = this.activeCollection.bound;
                 if (GraphicsAssist.isPointInRectangle(mousePoint, boundD)) {
                     document.body.style.cursor = "move";
                     this.operator = Operator.MoveEntity;
@@ -378,7 +378,7 @@ class MiracleMouseControl {
 
             for (let i = 0; i < this.visibleEntities.length; i++) {
                 const ent = this.visibleEntities[i];
-                const boundD = ent.boundD;
+                const boundD = ent.bound;
 
                 // // 测试 ---绘制屏幕包围框
                 // const ctx = this.canvas.getContext("2d");
@@ -410,7 +410,7 @@ class MiracleMouseControl {
             this.mouseDownPosition = new Point(event.offsetX, event.offsetY);
             if (this.operator === Operator.MoveEntity) {
                 if (this.getActiveEntities().length > 0) {
-                    const boundsD = this.getActiveEntities().map((ent) =>ent.boundD);
+                    const boundsD = this.getActiveEntities().map((ent) =>ent.bound);
 
                     const unionBoundD = Rectangle.union(boundsD);
 
@@ -490,7 +490,7 @@ class MiracleMouseControl {
         if (this.operator === Operator.BoxSelect && this.dynamicRect) {
             for (let i = 0; i < this.visibleEntities.length; i++) {
                 const ent = this.visibleEntities[i];
-                const boundD = ent.boundD;
+                const boundD = ent.bound;
                 const mouseRect = new Rectangle(GraphicsAssist.mid(this.dynamicRect.lt, this.dynamicRect.rd), this.dynamicRect.rd.x - this.dynamicRect.lt.x,
                     this.dynamicRect.rd.y - this.dynamicRect.lt.y);
                 if (Rectangle.intersection(mouseRect, boundD)) {
