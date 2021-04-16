@@ -59,7 +59,7 @@ abstract class Entity {
      * 包围框（世界坐标系）
      * 这个每次获得，都要重新计算包围框，大大降低了效率，后期考虑改进
      */
-    public get bound(): Rectangle {
+    protected get bound(): Rectangle {
         return this.getBound();
     }
 

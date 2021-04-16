@@ -158,14 +158,9 @@ class MiracleMouseControl {
         if (activeEntities.length > 0) {
             let boundD: Rectangle;
             if (this.activeCollection) {
-                const boundW = this.activeCollection.bound;
-                boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.location), 1 / this.activeCollection.ctf.worldToDevice_Len_X * boundW.width,
-                    1 / this.activeCollection.ctf.worldToDevice_Len_Y * boundW.height);
+                boundD = this.activeCollection.boundD;
             } else {
                 const entity = activeEntities[0];
-                // const boundW = entity.bound;
-                // boundD = new Rectangle(entity.ctf.worldToDevice_Point(boundW.location), 1 / entity.ctf.worldToDevice_Len_X * boundW.width,
-                //     1 / entity.ctf.worldToDevice_Len_Y * boundW.height);
                 boundD = entity.boundD;
             }
 
@@ -373,9 +368,7 @@ class MiracleMouseControl {
             }
 
             if (this.activeCollection) {
-                const boundW = this.activeCollection.bound;
-                const boundD = new Rectangle(this.activeCollection.ctf.worldToDevice_Point(boundW.location), 1 / this.activeCollection.ctf.worldToDevice_Len_X * boundW.width,
-                    1 / this.activeCollection.ctf.worldToDevice_Len_Y * boundW.height);
+                const boundD = this.activeCollection.boundD;
                 if (GraphicsAssist.isPointInRectangle(mousePoint, boundD)) {
                     document.body.style.cursor = "move";
                     this.operator = Operator.MoveEntity;

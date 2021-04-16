@@ -53,7 +53,6 @@ class Miracle {
         }
     }
 
-
     public redraw() {
         const ctx = this.up_canvas?.getContext("2d");
         if (ctx) {
