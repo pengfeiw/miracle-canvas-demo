@@ -56,22 +56,7 @@ export default class CoordTransform {
      * @param zoomScale 缩放比例
      */
     public zoom = (deviceZoomOrigin: Point, zoomScale: number) => {
-        // // 因为引入了角度，所以如果要改变x（主方向）和y（副方向）方向，需要将deviceZoomOrigin先恢复到angle为0的点
-        // const newOrigin = GraphicsAssist.rotatePoint(this.basePoint_world, deviceZoomOrigin, -this.anticlockwiseAngle);
-
-        // this._worldToDevice_Len_X = this._worldToDevice_Len_X * 1 / zoomScale;
-        // this._worldToDevice_Len_Y = this._worldToDevice_Len_Y * 1 / zoomScale;
-
-        // // 更改基点位置
-        // let dx = this.basePoint_world.x - newOrigin.x;
-        // let dy = this.basePoint_world.y - newOrigin.y;
-
-        // dx *= zoomScale;
-        // dy *= zoomScale;
-
-        // this.basePoint_world = new Point(newOrigin.x + dx, newOrigin.y + dy);
-
-        // // 因为引入了角度，所以如果要改变x（主方向）和y（副方向）方向，需要将deviceZoomOrigin先恢复到angle为0的点
+        // 因为引入了角度，所以如果要改变x（主方向）和y（副方向）方向，需要将deviceZoomOrigin先恢复到angle为0的点
         const newOrigin = GraphicsAssist.rotatePoint(this.basePoint_world, deviceZoomOrigin, -this.anticlockwiseAngle);
         this._worldToDevice_Len_X = this._worldToDevice_Len_X * 1 / zoomScale;
         this._worldToDevice_Len_Y = this._worldToDevice_Len_Y * 1 / zoomScale;

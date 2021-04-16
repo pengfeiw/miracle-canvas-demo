@@ -19,7 +19,7 @@ abstract class Entity {
     public borderStyle = "#007acc"; // 选中时边框样式
     public borderWidth = 2; // 选中时边框线宽
     public rotateControlDistance = 40; // 旋转点距离包围框矩形的距离
-    public constructor(position: Point) {
+    public constructor() {
         this.ctf = new CoordTransform(1);
     }
 
@@ -27,10 +27,20 @@ abstract class Entity {
         return this.ctf.base;
     }
 
+    public draw(ctx: CanvasRenderingContext2D) {
+        this.drawContent(ctx);
+        if (this.isActive) {
+            this.drawBound(ctx);
+            if (this.isDrawControlPoint) {
+                this.drawControlPoint(ctx);
+            }
+        }
+    }
+
     /**
-     * 绘制当前entity
+     * 绘制当前entity的内容
      */
-    public abstract draw(ctx: CanvasRenderingContext2D): void;
+    protected abstract drawContent(ctx: CanvasRenderingContext2D): void;
 
     /**
      * 获得包围框
@@ -41,7 +51,7 @@ abstract class Entity {
      * 设置旋转中心
      */
     protected abstract setRotateOrigin(originW: Point): void;
-    
+
     /**
      * 包围框（世界坐标系）
      * 这个每次获得，都要重新计算包围框，大大降低了效率，后期考虑改进
@@ -287,22 +297,63 @@ abstract class Entity {
  */
 export class Image extends Entity {
     public src: string;
-    public width: number;
-    public height: number;
-    constructor(position: Point, width: number, height: number, src: string) {
-        super(position);
-        this.src = src;
-        this.width = width;
-        this.height = height;
+    private get width() {
+        return this._image.width;
     }
-    public draw(ctx: CanvasRenderingContext2D): void {
-        throw new Error("Method not implemented.");
+    private get height() {
+        return this._image.height;
+    }
+    public position: Point;
+    private _image: HTMLImageElement;
+
+    /**
+     * _image是否load
+     */
+    private get imgLoaded() {
+        return this._image ? this._image.complete && this._image.naturalHeight !== 0 : false;
+    }
+    constructor(position: Point, src: string, size?: {width: number, height: number}) {
+        super();
+        this.position = position;
+        this.src = src;
+
+        let image = new window.Image();
+        if (size) {
+            image = new window.Image(size.width, size.height);
+        }
+        image.src = src;
+        this._image = image;
+
+        this.setRotateOrigin(new Point(this.position.x + 0.5 * this.width, this.position.y + 0.5 * this.height));
+    }
+    protected drawContent(ctx: CanvasRenderingContext2D): void {
+        const draw = () => {
+            const width = 1 / this.ctf.worldToDevice_Len_X * this.width;
+            const height = 1 / this.ctf.worldToDevice_Len_Y * this.height;
+            const x = this.position.x * 1 / this.ctf.worldToDevice_Len_X;
+            const y = this.position.y * 1 / this.ctf.worldToDevice_Len_Y;
+            ctx.translate(this.ctf.base.x, this.ctf.base.y);
+            ctx.rotate(-this.ctf.anticlockwiseAngle);
+            ctx.drawImage(this._image, x, y, width, height);
+            ctx.resetTransform();
+        };
+
+        if (this.imgLoaded) {
+            draw();
+        } else {
+            this._image.onload = () => {
+                draw();
+            };
+        }
     }
     public getBound(): Rectangle {
-        throw new Error("Method not implemented.");
+        return new Rectangle(new Point(this.position.x + 0.5 * this.width, this.position.y + 0.5 * this.height), this.width, this.height);
     }
     protected setRotateOrigin(originW: Point): void {
-        throw new Error("Method not implemented.");
+        const dx = this.position.x - originW.x;
+        const dy = this.position.y - originW.y;
+        this.position = new Point(dx, dy);
+        this.ctf.base = originW;
     }
 }
 
@@ -315,13 +366,12 @@ export abstract class Shape extends Entity {
     public fillStyle: string; // 填充色
     public filled: boolean; // 是否是填充色
     public constructor() {
-        super(new Point(0, 0));
+        super();
         this.lineW = 1;
         this.strokeStyle = "red";
         this.fillStyle = "red";
         this.filled = false;
     }
-    public abstract draw(ctx: CanvasRenderingContext2D): void;
 }
 
 /**
@@ -340,7 +390,7 @@ export class PolyShape extends Shape {
     /**
      * 在canvas上绘制图形
      */
-    public draw(ctx: CanvasRenderingContext2D): void {
+    protected drawContent(ctx: CanvasRenderingContext2D): void {
         if (this.vertexs.length <= 2) {
             throw new Error("the count of vertex must greater then 2.");
         }
@@ -374,13 +424,6 @@ export class PolyShape extends Shape {
                 ctx.closePath();
             }
             ctx.stroke();
-        }
-
-        if (this.isActive) {
-            this.drawBound(ctx);
-            if (this.isDrawControlPoint) {
-                this.drawControlPoint(ctx);
-            }
         }
     }
 
@@ -417,11 +460,11 @@ export class Circle extends Shape {
         this.center = center;
         this.radiusX = radius1;
         this.radiusY = radius2 ?? radius1;
-        
+
         this.setRotateOrigin(GraphicsAssist.mid(this.bound.lt, this.bound.rd));
     }
 
-    public draw(ctx: CanvasRenderingContext2D): void {
+    public drawContent(ctx: CanvasRenderingContext2D): void {
         // 改变样式
         ctx.strokeStyle = this.strokeStyle;
         ctx.fillStyle = this.fillStyle;
@@ -441,13 +484,6 @@ export class Circle extends Shape {
             ctx.fill();
         } else {
             ctx.stroke();
-        }
-
-        if (this.isActive) {
-            this.drawBound(ctx);
-            if (this.isDrawControlPoint) {
-                this.drawControlPoint(ctx);
-            }
         }
     }
 
@@ -471,7 +507,7 @@ export class Circle extends Shape {
 export class EntityCollection extends Entity {
     public entities: Entity[];
     public constructor(entities: Entity[]) {
-        super(new Point(0, 0));
+        super();
         this.entities = entities;
         this.ctf = new CoordTransform(1);
 
@@ -480,7 +516,7 @@ export class EntityCollection extends Entity {
         this.yLocked = true;
         this.diagLocked = true;
     }
-    public draw(ctx: CanvasRenderingContext2D): void {
+    public drawContent(ctx: CanvasRenderingContext2D): void {
         for (let i = 0; i < this.entities.length; i++) {
             this.entities[i].draw(ctx);
         }

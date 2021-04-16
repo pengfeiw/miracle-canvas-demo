@@ -1,7 +1,7 @@
 import './App.css';
 import {useEffect, useState, useRef} from "react";
 import Miracle from "./miracle";
-import {Circle, PolyShape} from "./miracle/entity";
+import {Circle, PolyShape, Image} from "./miracle/entity";
 import {Point} from "./miracle/graphic";
 
 const App = () => {
@@ -39,7 +39,13 @@ const App = () => {
             triangle.filled = true;
             triangle.closed = true;
             triangle.fillStyle = "gray";
-            miracle.addEntity(circle, rect, triangle);
+
+            const img = new Image(new Point(200, 300), "/logo192.png", {
+                width: 200,
+                height: 100
+            });
+
+            miracle.addEntity(circle, rect, triangle, img);
         }
     }, [miracle]);
     return (
