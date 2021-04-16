@@ -315,7 +315,7 @@ export class Image extends Entity {
     private get imgLoaded() {
         return this._image ? this._image.complete && this._image.naturalHeight !== 0 : false;
     }
-    constructor(position: Point, src: string, size?: {width: number, height: number}) {
+    constructor(position: Point, src: string, size: {width: number, height: number}) {
         super();
         this.position = position;
         this.src = src;

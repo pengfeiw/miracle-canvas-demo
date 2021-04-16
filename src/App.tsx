@@ -69,7 +69,10 @@ const App = () => {
             triangle.closed = true;
             triangle.fillStyle = "gray";
 
-            const img = new Image(new Point(200, 300), "/logo192.png");
+            const img = new Image(new Point(200, 300), "/logo192.png", {
+                height: 150,
+                width: 180
+            });
 
             miracle.addEntity(circle, rect, triangle, img);
             setRect(rect);
