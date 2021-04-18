@@ -1,8 +1,8 @@
 import './App.css';
 import {useEffect, useState, useRef} from "react";
-import Miracle from "./miracle";
-import {Circle, PolyShape, Image} from "./miracle/entity";
-import {Point} from "./miracle/graphic";
+import Miracle from "miracle-canvas";
+import {Circle, PolyShape, Image} from "miracle-canvas";
+import {Point} from "miracle-canvas/lib/cjs/graphic";
 
 const App = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
