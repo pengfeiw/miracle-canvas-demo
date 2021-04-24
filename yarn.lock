@@ -7291,10 +7291,10 @@ minizlib@^2.1.1:
     minipass "^3.0.0"
     yallist "^4.0.0"
 
-miracle-canvas@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npm.taobao.org/miracle-canvas/download/miracle-canvas-1.0.1.tgz#750c0f7b272fdbd30d7e4b1d1c70455eef643fa9"
-  integrity sha1-dQwPeycv29MNfksdHHBFXu9kP6k=
+miracle-canvas@1.0.6:
+  version "1.0.6"
+  resolved "https://registry.nlark.com/miracle-canvas/download/miracle-canvas-1.0.6.tgz#d2b3adc602857fe1edabcfda3435221b71aa0256"
+  integrity sha1-0rOtxgKFf+Htq8/aNDUiG3GqAlY=
 
 mississippi@^3.0.0:
   version "3.0.0"

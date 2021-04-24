@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="124" height="32" viewBox="0 0 124 32">
+  <g id="delete" transform="translate(-444 -371)">
+    <rect id="矩形_1" data-name="矩形 1" width="124" height="32" transform="translate(444 371)" fill="#26292c"/>
+    <text id="应用至多页" transform="translate(520 393)" fill="#fff" font-size="16" font-family="SourceHanSansCN-Regular, Source Han Sans CN"><tspan x="-23.168" y="0" xml:space="preserve">删    除</tspan></text>
+    <g id="icon_delete" transform="translate(-925 4807)">
+      <rect id="矩形_7134" data-name="矩形 7134" width="10" height="2" transform="translate(1386 -4433)" fill="#fff"/>
+      <rect id="矩形_7135" data-name="矩形 7135" width="24" height="2" transform="translate(1379 -4429)" fill="#fff"/>
+      <rect id="矩形_7137" data-name="矩形 7137" width="2" height="11" transform="translate(1387 -4424)" fill="#fff"/>
+      <rect id="矩形_7138" data-name="矩形 7138" width="2" height="11" transform="translate(1393 -4424)" fill="#fff"/>
+      <g id="矩形_7136" data-name="矩形 7136" transform="translate(1381 -4429)" fill="none" stroke="#fff" stroke-width="2.3">
+        <rect width="20" height="21" stroke="none"/>
+        <rect x="1.15" y="1.15" width="17.7" height="18.7" fill="none"/>
+      </g>
+    </g>
+  </g>
+</svg>

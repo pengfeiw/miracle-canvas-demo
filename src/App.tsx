@@ -1,18 +1,21 @@
 import './App.css';
 import {useEffect, useState, useRef} from "react";
-import Miracle from "miracle-canvas";
-import {Circle, PolyShape, Image} from "miracle-canvas";
-import {Point} from "miracle-canvas/lib/cjs/graphic";
+import {Miracle, MiracleEntity, MiracleGraphic, MiracleControl} from "miracle-canvas";
+import {} from "miracle-canvas";
+
+const {Circle, PolyShape, Image: MiracleImage} = MiracleEntity;
+const {Point} = MiracleGraphic;
+const {ImageControl, ControlBase} = MiracleControl;
 
 const App = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [miracle, setMiracle] = useState<Miracle>();
 
     // entity
-    const [rect, setRect] = useState<PolyShape>();
-    const [triangle, setTriangle] = useState<PolyShape>();
-    const [circle, setCircle] = useState<Circle>();
-    const [img, setImage] = useState<Image>();
+    const [rect, setRect] = useState<MiracleEntity.PolyShape>();
+    const [triangle, setTriangle] = useState<MiracleEntity.PolyShape>();
+    const [circle, setCircle] = useState<MiracleEntity.Circle>();
+    const [img, setImage] = useState<MiracleEntity.Image>();
 
     // 图形可见
     const [imgVisible, setImageVisible] = useState(true);
@@ -65,6 +68,16 @@ const App = () => {
 
     useEffect(() => {
         if (miracle) {
+            const button1 = new ImageControl("/1.svg", {width: 115, height: 24}, ControlBase.lt, -124, 0);
+            const button2 = new ImageControl("/2.svg", {width: 115, height: 24}, ControlBase.lt, -124, 28);
+
+            button1.mouseUpHandler = () => {
+                alert("button1 click");
+            };
+            button2.mouseUpHandler = () => {
+                alert("button2 click");
+            };
+
             const rect = new PolyShape([
                 new Point(150, 30),
                 new Point(200, 30),
@@ -73,6 +86,8 @@ const App = () => {
             ], false);
             rect.filled = false;
             rect.closed = true;
+
+            rect.addControl(button1, button2);
 
             const circle = new Circle(new Point(400, 400), 50);
             circle.strokeStyle = "green";
@@ -86,7 +101,7 @@ const App = () => {
             triangle.closed = true;
             triangle.fillStyle = "gray";
 
-            const img = new Image(new Point(200, 300), "/logo192.png", {
+            const img = new MiracleImage(new Point(300, 300), "/logo192.png", {
                 height: 150,
                 width: 180
             });
